@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>[原]Hibernate学习记录3 Hibernate 配置多数据源 | 谢厂节的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="实验环境 Spring3.1.1 Hibernate 4.1.4 Jersey  示例中只使用了一个secondFactory_second。另一个sessionFactory代码不是处理核心，这里未贴出。 model定义&amp;lt;span class=&amp;quot;hljs-annotation&amp;quot;&amp;gt;@Message&amp;lt;/span&amp;gt;  &amp;lt;span class=&amp;quot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[原]Hibernate学习记录3 Hibernate 配置多数据源">
+<meta property="og:url" content="https://xiexiexin.github.io/2017/04/15/原-Hibernate学习记录3-Hibernate-配置多数据源/index.html">
+<meta property="og:site_name" content="谢厂节的博客">
+<meta property="og:description" content="实验环境 Spring3.1.1 Hibernate 4.1.4 Jersey  示例中只使用了一个secondFactory_second。另一个sessionFactory代码不是处理核心，这里未贴出。 model定义&amp;lt;span class=&amp;quot;hljs-annotation&amp;quot;&amp;gt;@Message&amp;lt;/span&amp;gt;  &amp;lt;span class=&amp;quot">
+<meta property="og:updated_time" content="2017-05-06T12:11:32.416Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[原]Hibernate学习记录3 Hibernate 配置多数据源">
+<meta name="twitter:description" content="实验环境 Spring3.1.1 Hibernate 4.1.4 Jersey  示例中只使用了一个secondFactory_second。另一个sessionFactory代码不是处理核心，这里未贴出。 model定义&amp;lt;span class=&amp;quot;hljs-annotation&amp;quot;&amp;gt;@Message&amp;lt;/span&amp;gt;  &amp;lt;span class=&amp;quot">
+  
+    <link rel="alternate" href="/atom.xml" title="谢厂节的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">谢厂节的博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">技术小栈</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://xiexiexin.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-原-Hibernate学习记录3-Hibernate-配置多数据源" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/15/原-Hibernate学习记录3-Hibernate-配置多数据源/" class="article-date">
+  <time datetime="2017-04-15T07:38:55.000Z" itemprop="datePublished">2017-04-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      [原]Hibernate学习记录3 Hibernate 配置多数据源
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="实验环境"><a href="#实验环境" class="headerlink" title="实验环境"></a>实验环境</h1><ul>
+<li>Spring3.1.1</li>
+<li>Hibernate 4.1.4</li>
+<li>Jersey</li>
+</ul>
+<p>示例中只使用了一个secondFactory_second。另一个sessionFactory代码不是处理核心，这里未贴出。</p>
+<h2 id="model定义"><a href="#model定义" class="headerlink" title="model定义"></a>model定义</h2><pre><code>&lt;span class=&quot;hljs-annotation&quot;&gt;@Message&lt;/span&gt; 
+&lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;User&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;implements&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;java&lt;/span&gt;.&lt;span class=&quot;hljs-title&quot;&gt;io&lt;/span&gt;.&lt;span class=&quot;hljs-title&quot;&gt;Serializable&lt;/span&gt; {&lt;/span&gt;
+
+    &lt;span class=&quot;hljs-comment&quot;&gt;// Fields&lt;/span&gt;
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; String userUnid;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; String userLoginName;
+
+    &lt;span class=&quot;hljs-comment&quot;&gt;// Constructors&lt;/span&gt;
+
+    &lt;span class=&quot;hljs-javadoc&quot;&gt;/** default constructor */&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;User&lt;/span&gt;() {
+    }
+
+    &lt;span class=&quot;hljs-javadoc&quot;&gt;/** minimal constructor */&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;User&lt;/span&gt;(String userUnid) {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userUnid = userUnid;
+    }
+
+    &lt;span class=&quot;hljs-javadoc&quot;&gt;/** full constructor */&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;User&lt;/span&gt;(String userUnid, String userLoginName) {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userUnid = userUnid;
+        &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userLoginName = userLoginName;
+    }
+
+    &lt;span class=&quot;hljs-comment&quot;&gt;// Property accessors&lt;/span&gt;
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; String &lt;span class=&quot;hljs-title&quot;&gt;getUserUnid&lt;/span&gt;() {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userUnid;
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;setUserUnid&lt;/span&gt;(String userUnid) {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userUnid = userUnid;
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; String &lt;span class=&quot;hljs-title&quot;&gt;getUserLoginName&lt;/span&gt;() {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userLoginName;
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;setUserLoginName&lt;/span&gt;(String userLoginName) {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userLoginName = userLoginName;
+    }
+}`&lt;/pre&gt;
+
+## dao
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; java.util.List;
+
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.LockOptions;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.Query;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.criterion.Example;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.slf4j.Logger;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.slf4j.LoggerFactory;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.springframework.context.ApplicationContext;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.springframework.transaction.annotation.Transactional;
+
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; com.cn.hightech.hb.BaseHibernateDAO;
+
+&lt;span class=&quot;hljs-annotation&quot;&gt;@Transactional&lt;/span&gt;
+&lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;UserDAO&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;BaseHibernateDAO&lt;/span&gt; {&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;final&lt;/span&gt; Logger log = LoggerFactory
+            .getLogger(UserDAO.class);
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;final&lt;/span&gt; String USER_LOGIN_NAME = &lt;span class=&quot;hljs-string&quot;&gt;&quot;userLoginName&quot;&lt;/span&gt;;
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;save&lt;/span&gt;(User transientInstance) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;saving User instance&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            getCurrentSession().save(transientInstance);
+            log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;save successful&quot;&lt;/span&gt;);
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;save failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;delete&lt;/span&gt;(User persistentInstance) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;deleting User instance&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            getCurrentSession().delete(persistentInstance);
+            log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;delete successful&quot;&lt;/span&gt;);
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;delete failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; User &lt;span class=&quot;hljs-title&quot;&gt;findById&lt;/span&gt;(java.lang.String id) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;getting User instance with id: &quot;&lt;/span&gt; + id);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            User instance = (User) getCurrentSession().get(
+                    &lt;span class=&quot;hljs-string&quot;&gt;&quot;com.cn.hightech.entity.gx.User&quot;&lt;/span&gt;, id);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; instance;
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;get failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; List &lt;span class=&quot;hljs-title&quot;&gt;findByExample&lt;/span&gt;(User instance) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;finding User instance by example&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            List results = getCurrentSession()
+                    .createCriteria(&lt;span class=&quot;hljs-string&quot;&gt;&quot;com.cn.hightech.entity.gx.User&quot;&lt;/span&gt;)
+                    .add(Example.create(instance)).list();
+            log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;find by example successful, result size: &quot;&lt;/span&gt;
+                    + results.size());
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; results;
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;find by example failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; List &lt;span class=&quot;hljs-title&quot;&gt;findByProperty&lt;/span&gt;(String propertyName, Object value) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;finding User instance with property: &quot;&lt;/span&gt; + propertyName
+                + &lt;span class=&quot;hljs-string&quot;&gt;&quot;, value: &quot;&lt;/span&gt; + value);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            String queryString = &lt;span class=&quot;hljs-string&quot;&gt;&quot;from User as model where model.&quot;&lt;/span&gt;
+                    + propertyName + &lt;span class=&quot;hljs-string&quot;&gt;&quot;= ?&quot;&lt;/span&gt;;
+            Query queryObject = getCurrentSession().createQuery(queryString);
+            queryObject.setParameter(&lt;span class=&quot;hljs-number&quot;&gt;0&lt;/span&gt;, value);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; queryObject.list();
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;find by property name failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; List &lt;span class=&quot;hljs-title&quot;&gt;findByUserLoginName&lt;/span&gt;(Object userLoginName) {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; findByProperty(USER_LOGIN_NAME, userLoginName);
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; List &lt;span class=&quot;hljs-title&quot;&gt;findAll&lt;/span&gt;() {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;finding all User instances&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            String queryString = &lt;span class=&quot;hljs-string&quot;&gt;&quot;from User&quot;&lt;/span&gt;;
+            Query queryObject = getCurrentSession().createQuery(queryString);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; queryObject.list();
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;find all failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; User &lt;span class=&quot;hljs-title&quot;&gt;merge&lt;/span&gt;(User detachedInstance) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;merging User instance&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            User result = (User) getCurrentSession().merge(
+                    detachedInstance);
+            log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;merge successful&quot;&lt;/span&gt;);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; result;
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;merge failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;attachDirty&lt;/span&gt;(User instance) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;attaching dirty User instance&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            getCurrentSession().saveOrUpdate(instance);
+            log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;attach successful&quot;&lt;/span&gt;);
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;attach failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;attachClean&lt;/span&gt;(User instance) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;attaching clean User instance&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            getCurrentSession().buildLockRequest(LockOptions.NONE).lock(
+                    instance);
+            log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;attach successful&quot;&lt;/span&gt;);
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;attach failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@SuppressWarnings&lt;/span&gt;(&lt;span class=&quot;hljs-string&quot;&gt;&quot;unchecked&quot;&lt;/span&gt;)
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; List&amp;lt;User&amp;gt; &lt;span class=&quot;hljs-title&quot;&gt;findByPage&lt;/span&gt;(&lt;span class=&quot;hljs-keyword&quot;&gt;int&lt;/span&gt; page,&lt;span class=&quot;hljs-keyword&quot;&gt;int&lt;/span&gt; limit,String where,String order) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;finding page User instances&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            String queryString = &lt;span class=&quot;hljs-string&quot;&gt;&quot;from User&quot;&lt;/span&gt;;
+            &lt;span class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt;(!(where.equals(&lt;span class=&quot;hljs-string&quot;&gt;&quot;&quot;&lt;/span&gt;) || where.equals(&lt;span class=&quot;hljs-string&quot;&gt;&quot;&apos;&apos;&quot;&lt;/span&gt;)))queryString = queryString+&lt;span class=&quot;hljs-string&quot;&gt;&quot; WHERE &quot;&lt;/span&gt;+where;
+            &lt;span class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt;(!(order.equals(&lt;span class=&quot;hljs-string&quot;&gt;&quot;&quot;&lt;/span&gt;))) queryString=queryString+ &lt;span class=&quot;hljs-string&quot;&gt;&quot; ORDER BY &quot;&lt;/span&gt; +order;
+
+            Query queryObject = getCurrentSession().createQuery(queryString);
+            queryObject.setMaxResults(limit);
+            queryObject.setFirstResult((page-&lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;)*limit);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; queryObject.list();
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;find all failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;count&lt;/span&gt;(String where){
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;counting User instances&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            String queryString = &lt;span class=&quot;hljs-string&quot;&gt;&quot;select count(*) from User table&quot;&lt;/span&gt;;
+            &lt;span class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt;(!where.equals(&lt;span class=&quot;hljs-string&quot;&gt;&quot;&quot;&lt;/span&gt;))queryString = queryString+&lt;span class=&quot;hljs-string&quot;&gt;&quot; WHERE &quot;&lt;/span&gt;+where;
+            Long count = (Long)getCurrentSession().createQuery(queryString).uniqueResult();
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; count.intValue();
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;find all failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; UserDAO &lt;span class=&quot;hljs-title&quot;&gt;getFromApplicationContext&lt;/span&gt;(ApplicationContext ctx) {
+        UserDAO m= (UserDAO) ctx.getBean(&lt;span class=&quot;hljs-string&quot;&gt;&quot;UserDAO&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; m;
+    }
+}`&lt;/pre&gt;
+
+## BaseHibernateDAO
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`
+&lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;BaseHibernateDAO&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;implements&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;IBaseHibernateDAO&lt;/span&gt; {&lt;/span&gt;
+
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Override&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; Session &lt;span class=&quot;hljs-title&quot;&gt;getSession&lt;/span&gt;() {
+        &lt;span class=&quot;hljs-comment&quot;&gt;//return HibernateessFactory.getSession();&lt;/span&gt;
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; secondFactory_second.getCurrentSession();
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; secondFactory secondFactory;
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;setsecondFactory&lt;/span&gt;(secondFactory secondFactory) {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.secondFactory = secondFactory;
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; Session &lt;span class=&quot;hljs-title&quot;&gt;getCurrentSession&lt;/span&gt;() {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; secondFactory.getCurrentSession();
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;initDao&lt;/span&gt;() {
+        &lt;span class=&quot;hljs-comment&quot;&gt;// do nothing&lt;/span&gt;
+    }
+
+    &lt;span class=&quot;hljs-javadoc&quot;&gt;/**
+     * 把某个对象变成游离 防止误改属性
+     *&lt;span class=&quot;hljs-javadoctag&quot;&gt; @param&lt;/span&gt; m
+     */&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;evict&lt;/span&gt;(Object m){
+        getSession().evict(m);;
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;flush&lt;/span&gt;(){
+        getSession().flush();
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;clear&lt;/span&gt;(){
+        getSession().clear();
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;commit&lt;/span&gt;(){
+        getSession().getTransaction().commit();
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;beginTrasaction&lt;/span&gt;(){
+        getSession().beginTransaction();
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;rollback&lt;/span&gt;(){
+        getSession().getTransaction().rollback();
+    }
+}`&lt;/pre&gt;
+
+## HibernateessFactory
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.HibernateException;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.Session;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.secondFactory;
+
+&lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;HibernateSessionFactory&lt;/span&gt; {&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; secondFactory secondFactory;
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;HibernateSessionFactory&lt;/span&gt;() {
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; Session &lt;span class=&quot;hljs-title&quot;&gt;getSession&lt;/span&gt;() &lt;span class=&quot;hljs-keyword&quot;&gt;throws&lt;/span&gt; HibernateException {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; sessionFactory_second.getCurrentSession();
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;closeSession&lt;/span&gt;() &lt;span class=&quot;hljs-keyword&quot;&gt;throws&lt;/span&gt; HibernateException {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt; (sessionFactory_second.getCurrentSession() != &lt;span class=&quot;hljs-keyword&quot;&gt;null&lt;/span&gt;) {
+            sessionFactory_second.getCurrentSession().close();
+        }
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; SessionFactory &lt;span class=&quot;hljs-title&quot;&gt;getSessionFactory&lt;/span&gt;() {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; sessionFactory_second;
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;setSessionFactory&lt;/span&gt;(SessionFactory sf){
+        sessionFactory_second = sf;
+    }
+}`&lt;/pre&gt;
+
+## IBaseHibernateDAO
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.Session;
+
+&lt;span class=&quot;hljs-javadoc&quot;&gt;/**
+ * Data accsecond interface for domain model
+ *&lt;span class=&quot;hljs-javadoctag&quot;&gt; @author&lt;/span&gt; MyEclipse Persistence Tools
+ */&lt;/span&gt;
+&lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;IBaseHibernateDAO&lt;/span&gt; {&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; Session &lt;span class=&quot;hljs-title&quot;&gt;getSession&lt;/span&gt;();
+}`&lt;/pre&gt;
+
+## hbm.xml
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&amp;lt;hibernate-mapping&amp;gt;
+    &amp;lt;&lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;com.cn.hightech.entity.gx.User&quot;&lt;/span&gt; table=&lt;span class=&quot;hljs-string&quot;&gt;&quot;_USER&quot;&lt;/span&gt; schema=&lt;span class=&quot;hljs-string&quot;&gt;&quot;WAS&quot;&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;userUnid&quot;&lt;/span&gt; type=&lt;span class=&quot;hljs-string&quot;&gt;&quot;java.lang.String&quot;&lt;/span&gt;&amp;gt;
+            &amp;lt;column &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;USER_UNID&quot;&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;length&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;32&quot;&lt;/span&gt; /&amp;gt;
+            &amp;lt;generator &lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;assigned&quot;&lt;/span&gt; /&amp;gt;
+        &amp;lt;/&lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;userLoginName&quot;&lt;/span&gt; type=&lt;span class=&quot;hljs-string&quot;&gt;&quot;java.lang.String&quot;&lt;/span&gt;&amp;gt;
+            &amp;lt;column &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;USER_LOGIN_NAME&quot;&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;length&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;100&quot;&lt;/span&gt; /&amp;gt;
+        &amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+    &amp;lt;/&lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;&amp;gt;
+&amp;lt;/hibernate-mapping&amp;gt;
+`&lt;/pre&gt;
+
+## applicationContext.xml
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&amp;lt;!&lt;span class=&quot;hljs-comment&quot;&gt;-- gx --&amp;gt;&lt;/span&gt;
+    &amp;lt;bean &lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;dataSource_second&quot;&lt;/span&gt; &lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;com.mchange.v2.c3p0.ComboPooledDataSource&quot;&lt;/span&gt; destroy-method=&lt;span class=&quot;hljs-string&quot;&gt;&quot;close&quot;&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;driverClass&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;oracle.jdbc.OracleDriver&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;jdbcUrl&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;jdbc:oracle:thin:@112.29.170.10:1521:gx&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;user&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;gx&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;password&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;feFG33$$523&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;maxIdleTime&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;60&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;  
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;maxPoolSize&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;20&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;  
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;minPoolSize&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;10&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;acquireRetryDelay&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;1000&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;  
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;acquireRetryAttempts&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;60&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;  
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;breakAfterAcquireFailure&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;false&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt; 
+    &amp;lt;/bean&amp;gt;
+    &amp;lt;bean &lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;secondFactory_second&quot;&lt;/span&gt; &lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;org.springframework.orm.hibernate4.LocalsecondFactoryBean&quot;&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;dataSource&quot;&lt;/span&gt;&amp;gt;&amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;ref&lt;/span&gt; bean=&lt;span class=&quot;hljs-string&quot;&gt;&quot;dataSource_second&quot;&lt;/span&gt; /&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;hibernateProperties&quot;&lt;/span&gt;&amp;gt;
+            &amp;lt;props&amp;gt;
+                &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt; key=&lt;span class=&quot;hljs-string&quot;&gt;&quot;hibernate.dialect&quot;&lt;/span&gt;&amp;gt;org.hibernate.dialect.Oracle9Dialect&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt;&amp;gt;
+                &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt; key=&lt;span class=&quot;hljs-string&quot;&gt;&quot;current_Session_context_class&quot;&lt;/span&gt;&amp;gt;thread&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt;&amp;gt;
+                &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt; key=&lt;span class=&quot;hljs-string&quot;&gt;&quot;hibernate.show_sql&quot;&lt;/span&gt;&amp;gt;&lt;span class=&quot;hljs-constant&quot;&gt;true&lt;/span&gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt;&amp;gt;
+                &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt; key=&lt;span class=&quot;hljs-string&quot;&gt;&quot;hibernate.jdbc.fetch_size&quot;&lt;/span&gt;&amp;gt;&lt;span class=&quot;hljs-number&quot;&gt;50&lt;/span&gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt;&amp;gt;
+                &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt; key=&lt;span class=&quot;hljs-string&quot;&gt;&quot;hibernate.jdbc.batch_size&quot;&lt;/span&gt;&amp;gt;&lt;span class=&quot;hljs-number&quot;&gt;30&lt;/span&gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt;&amp;gt;
+                &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt; key=&lt;span class=&quot;hljs-string&quot;&gt;&quot;javax.persistence.validation.mode&quot;&lt;/span&gt;&amp;gt;none&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt;&amp;gt;
+            &amp;lt;/props&amp;gt;
+        &amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;mappingResources&quot;&lt;/span&gt;&amp;gt;
+            &amp;lt;&lt;span class=&quot;hljs-type&quot;&gt;list&lt;/span&gt;&amp;gt;
+                &amp;lt;value&amp;gt;com/cn/hightech/entity/gx/Dept.hbm.xml&amp;lt;/value&amp;gt;
+                &amp;lt;value&amp;gt;com/cn/hightech/entity/gx/User.hbm.xml&amp;lt;/value&amp;gt;
+            &amp;lt;/&lt;span class=&quot;hljs-type&quot;&gt;list&lt;/span&gt;&amp;gt;
+        &amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+    &amp;lt;/bean&amp;gt;
+    &amp;lt;bean &lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;hibernatesecondFactory_second&quot;&lt;/span&gt; &lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;com.cn.hightech.hb.HibernatesecondFactory&quot;&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;secondFactory&quot;&lt;/span&gt;&amp;gt;&amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;ref&lt;/span&gt; bean=&lt;span class=&quot;hljs-string&quot;&gt;&quot;secondFactory_second&quot;&lt;/span&gt; /&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+    &amp;lt;/bean&amp;gt;
+    &amp;lt;bean &lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;transactionManager_second&quot;&lt;/span&gt; &lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;org.springframework.orm.hibernate4.HibernateTransactionManager&quot;&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;secondFactory&quot;&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;ref&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;secondFactory_second&quot;&lt;/span&gt; /&amp;gt;
+    &amp;lt;/bean&amp;gt;
+
+    &amp;lt;tx:annotation-driven &lt;span class=&quot;hljs-keyword&quot;&gt;transaction&lt;/span&gt;-manager=&lt;span class=&quot;hljs-string&quot;&gt;&quot;transactionManager_second&quot;&lt;/span&gt;  proxy-target-&lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;true&quot;&lt;/span&gt;/&amp;gt;
+    &amp;lt;bean &lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;UserDAO&quot;&lt;/span&gt; &lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;com.cn.hightech.entity.gx.UserDAO&quot;&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;secondFactory&quot;&lt;/span&gt;&amp;gt;
+            &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;ref&lt;/span&gt; bean=&lt;span class=&quot;hljs-string&quot;&gt;&quot;sessionFactory_second&quot;&lt;/span&gt; /&amp;gt;
+        &amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+    &amp;lt;/bean&amp;gt;`&lt;/pre&gt;
+
+## controller
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-javadoc&quot;&gt;/**
+* 下面@Transactional 和&lt;span class=&quot;hljs-javadoctag&quot;&gt; @Service&lt;/span&gt;&lt;span class=&quot;hljs-javadoctag&quot;&gt; @Provider&lt;/span&gt;注解都需要
+**/&lt;/span&gt;
+&lt;span class=&quot;hljs-annotation&quot;&gt;@Service&lt;/span&gt;
+&lt;span class=&quot;hljs-annotation&quot;&gt;@Provider&lt;/span&gt;
+&lt;span class=&quot;hljs-annotation&quot;&gt;@Path&lt;/span&gt;(&lt;span class=&quot;hljs-string&quot;&gt;&quot;/User/&quot;&lt;/span&gt;)
+&lt;span class=&quot;hljs-annotation&quot;&gt;@Transactional&lt;/span&gt;(&lt;span class=&quot;hljs-string&quot;&gt;&quot;transactionManager_second&quot;&lt;/span&gt;)
+&lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;UserController&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;BaseController&lt;/span&gt;{&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;long&lt;/span&gt; serialVersionUID = &lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;L;
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Context&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; HttpServletRequest request;
+
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Context&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; ApplicationContext ctx;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;UserController&lt;/span&gt;(){
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;UserController&lt;/span&gt;(HttpServletRequest request1){
+        request=request1;
+    }
+
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Transactional&lt;/span&gt;(&lt;span class=&quot;hljs-string&quot;&gt;&quot;transactionManager_second&quot;&lt;/span&gt;)
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@GET&lt;/span&gt;
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Path&lt;/span&gt;(&lt;span class=&quot;hljs-string&quot;&gt;&quot;/Query/&quot;&lt;/span&gt;)
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Produces&lt;/span&gt;({MediaType.APPLICATION_JSON})
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Consumes&lt;/span&gt;({MediaType.APPLICATION_JSON})
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; User &lt;span class=&quot;hljs-title&quot;&gt;Query&lt;/span&gt;(@&lt;span class=&quot;hljs-title&quot;&gt;QueryParam&lt;/span&gt;(&quot;USER_UNID&quot;) String USER_UNID) &lt;span class=&quot;hljs-keyword&quot;&gt;throws&lt;/span&gt; IOException{
+        &lt;span class=&quot;hljs-comment&quot;&gt;//登陆验证&lt;/span&gt;
+        User loginUser=QueryFromCache();
+        &lt;span class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt;(loginUser==&lt;span class=&quot;hljs-keyword&quot;&gt;null&lt;/span&gt;)&lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;null&lt;/span&gt;;
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; UserDAO.getFromApplicationContext(ctx).findById(USER_UNID);
+    }
+}
+
+        &lt;div&gt;
+            作者：xundh 发表于2017/4/15 15:38:55 [原文链接](http://blog.csdn.net/xundh/article/details/69239019)
+        &lt;/div&gt;
+        &lt;div&gt;
+        阅读：82 评论：0 [查看评论](http://blog.csdn.net/xundh/article/details/69239019#comments)
+        &lt;/div&gt;
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://xiexiexin.github.io/2017/04/15/原-Hibernate学习记录3-Hibernate-配置多数据源/" data-id="cj2d8br0y000870m4d2f2v1y7" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/04/15/原-Hibernate学习记录4-缓存机制/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          [原]Hibernate学习记录4 缓存机制
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/04/15/原-运维基础——Zabbix入门/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">[原]运维基础——Zabbix入门</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">五月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/06/First-Article/">First Article</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/06/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/03/原-Hadoop-学习笔记十-HA高可用设置/">[原]Hadoop 学习笔记十 HA高可用设置</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/03/原-Hadoop-学习笔记九-任务远程提交-Java远程提交/">[原]Hadoop 学习笔记九 任务远程提交--Java远程提交</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/02/原-Hadoop-学习笔记八-任务远程提交-Eclipse插件/">[原]Hadoop 学习笔记八 任务远程提交--Eclipse插件</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 谢厂节(Cade)<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

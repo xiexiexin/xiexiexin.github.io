@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>[原]Hadoop 学习笔记八 Hadoop2.X 64位编译 | 谢厂节的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="实验环境 ：   实验楼- 安装mavenwget http://mirror&amp;lt;span class=&amp;quot;hljs-preprocessor&amp;quot;&amp;gt;.bit&amp;lt;/span&amp;gt;&amp;lt;span class=&amp;quot;hljs-preprocessor&amp;quot;&amp;gt;.edu&amp;lt;/span&amp;gt;&amp;lt;span class=&amp;quot;hljs-prepr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[原]Hadoop 学习笔记八 Hadoop2.X 64位编译">
+<meta property="og:url" content="https://xiexiexin.github.io/2017/04/16/原-Hadoop-学习笔记八-Hadoop2-X-64位编译/index.html">
+<meta property="og:site_name" content="谢厂节的博客">
+<meta property="og:description" content="实验环境 ：   实验楼- 安装mavenwget http://mirror&amp;lt;span class=&amp;quot;hljs-preprocessor&amp;quot;&amp;gt;.bit&amp;lt;/span&amp;gt;&amp;lt;span class=&amp;quot;hljs-preprocessor&amp;quot;&amp;gt;.edu&amp;lt;/span&amp;gt;&amp;lt;span class=&amp;quot;hljs-prepr">
+<meta property="og:updated_time" content="2017-05-06T12:11:32.416Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[原]Hadoop 学习笔记八 Hadoop2.X 64位编译">
+<meta name="twitter:description" content="实验环境 ：   实验楼- 安装mavenwget http://mirror&amp;lt;span class=&amp;quot;hljs-preprocessor&amp;quot;&amp;gt;.bit&amp;lt;/span&amp;gt;&amp;lt;span class=&amp;quot;hljs-preprocessor&amp;quot;&amp;gt;.edu&amp;lt;/span&amp;gt;&amp;lt;span class=&amp;quot;hljs-prepr">
+  
+    <link rel="alternate" href="/atom.xml" title="谢厂节的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">谢厂节的博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">技术小栈</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://xiexiexin.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-原-Hadoop-学习笔记八-Hadoop2-X-64位编译" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/16/原-Hadoop-学习笔记八-Hadoop2-X-64位编译/" class="article-date">
+  <time datetime="2017-04-16T13:26:18.000Z" itemprop="datePublished">2017-04-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      [原]Hadoop 学习笔记八 Hadoop2.X 64位编译
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>实验环境 ：  </p>
+<p>实验楼-</p>
+<h2 id="安装maven"><a href="#安装maven" class="headerlink" title="安装maven"></a>安装maven</h2><pre><code>wget http://mirror&lt;span class=&quot;hljs-preprocessor&quot;&gt;.bit&lt;/span&gt;&lt;span class=&quot;hljs-preprocessor&quot;&gt;.edu&lt;/span&gt;&lt;span class=&quot;hljs-preprocessor&quot;&gt;.cn&lt;/span&gt;/apache/maven/maven-&lt;span class=&quot;hljs-number&quot;&gt;3&lt;/span&gt;/&lt;span class=&quot;hljs-number&quot;&gt;3.0&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.5&lt;/span&gt;/binaries/apache-maven-&lt;span class=&quot;hljs-number&quot;&gt;3.0&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.5&lt;/span&gt;-bin&lt;span class=&quot;hljs-preprocessor&quot;&gt;.tar&lt;/span&gt;&lt;span class=&quot;hljs-preprocessor&quot;&gt;.gz&lt;/span&gt;
+tar -zxf apache-maven-&lt;span class=&quot;hljs-number&quot;&gt;3.0&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.5&lt;/span&gt;-bin&lt;span class=&quot;hljs-preprocessor&quot;&gt;.tar&lt;/span&gt;&lt;span class=&quot;hljs-preprocessor&quot;&gt;.gz&lt;/span&gt;
+mv apache-maven-&lt;span class=&quot;hljs-number&quot;&gt;3.0&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.5&lt;/span&gt; /app/lib
+sudo vim /etc/profile
+`&lt;/pre&gt;
+
+添加内容：
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-keyword&quot;&gt;export&lt;/span&gt; MAVEN_HOME=/app/lib/apache-maven-&lt;span class=&quot;hljs-number&quot;&gt;3.0&lt;/span&gt;.&lt;span class=&quot;hljs-number&quot;&gt;5&lt;/span&gt;
+&lt;span class=&quot;hljs-keyword&quot;&gt;export&lt;/span&gt; PATH=&lt;span class=&quot;hljs-variable&quot;&gt;$PATH&lt;/span&gt;:&lt;span class=&quot;hljs-variable&quot;&gt;$MAVEN_HOME&lt;/span&gt;/bin`&lt;/pre&gt;
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-built_in&quot;&gt;source&lt;/span&gt; /etc/profile
+mvn -version`&lt;/pre&gt;
+
+## 安装 SVN等工具
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-built_in&quot;&gt;sudo&lt;/span&gt; yum install svn
+&lt;span class=&quot;hljs-built_in&quot;&gt;sudo&lt;/span&gt; yum install autoconf automake libtool cmake
+&lt;span class=&quot;hljs-built_in&quot;&gt;sudo&lt;/span&gt; yum install ncurses-devel
+&lt;span class=&quot;hljs-built_in&quot;&gt;sudo&lt;/span&gt; yum install openssl-devel
+&lt;span class=&quot;hljs-built_in&quot;&gt;sudo&lt;/span&gt; yum install gcc*`&lt;/pre&gt;
+
+## 安装并设置protobuf
+
+下载 [https://code.google.com/p/protobuf/downloads/list](https://code.google.com/p/protobuf/downloads/list) 
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`wget &lt;span class=&quot;hljs-keyword&quot;&gt;...&lt;/span&gt;
+cd /home/shiyanlou/install-pack
+tar -zxf protobuf-&lt;span class=&quot;hljs-number&quot;&gt;2.5&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.0&lt;/span&gt;.tar.gz
+mv protobuf-&lt;span class=&quot;hljs-number&quot;&gt;2.5&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.0&lt;/span&gt; /app/lib
+
+cd /app/lib/protobuf-&lt;span class=&quot;hljs-number&quot;&gt;2.5&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.0&lt;/span&gt;/
+sudo ./configure
+sudo make
+sudo make check
+sudo make install
+protoc`&lt;/pre&gt;
+
+![这里写图片描述](http://img.blog.csdn.net/20170416210053428?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+
+## 编译hadoop
+
+通过SVN checkout hadoop源码Release2.2.0
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`cd /app
+mkdir compile
+svn checkout http://svn&lt;span class=&quot;hljs-preprocessor&quot;&gt;.apache&lt;/span&gt;&lt;span class=&quot;hljs-preprocessor&quot;&gt;.org&lt;/span&gt;/repos/asf/hadoop/common/tags/release-&lt;span class=&quot;hljs-number&quot;&gt;2.2&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.0&lt;/span&gt;
+或
+wget http://apache&lt;span class=&quot;hljs-preprocessor&quot;&gt;.dataguru&lt;/span&gt;&lt;span class=&quot;hljs-preprocessor&quot;&gt;.cn&lt;/span&gt;/hadoop/common/stable/hadoop-&lt;span class=&quot;hljs-number&quot;&gt;2.2&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.0&lt;/span&gt;-src&lt;span class=&quot;hljs-preprocessor&quot;&gt;.tar&lt;/span&gt;&lt;span class=&quot;hljs-preprocessor&quot;&gt;.gz&lt;/span&gt;`&lt;/pre&gt;
+
+实验中系统无法访问远程网址。 
+
+以下内容未予以验证。
+
+编译：
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`mvn package &lt;span class=&quot;hljs-attribute&quot;&gt;-Pdist&lt;/span&gt;,native &lt;span class=&quot;hljs-attribute&quot;&gt;-DskipTests&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;-Dtar&lt;/span&gt;`&lt;/pre&gt;
+
+编译好的64位安装包在hadoop-dist/target/hadoop-2.2.2.tar.gz
+
+### 验证
+
+到hadoop-dist/target/hadoop-2.2.0/lib/native查看：
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-built_in&quot;&gt;file&lt;/span&gt; ./libhadoop.so&lt;span class=&quot;hljs-number&quot;&gt;.1&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.0&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.0&lt;/span&gt;`&lt;/pre&gt;
+
+该文件为ELF 64-bit LSB则表示文件成功编译为64位。
+
+pom.xml 问题处理： 
+
+ - Filed to execute goal org.apache.maven.plugins.maven-compiler-plugin:2.5.1:testCompile …. 
+
+修改hadoop-common-project/hadoop-auth/pom.xml，加：
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`org&lt;span class=&quot;hljs-preprocessor&quot;&gt;.martbay&lt;/span&gt;&lt;span class=&quot;hljs-preprocessor&quot;&gt;.jetty&lt;/span&gt;
+jetty-util
+test
+
+        &lt;div&gt;
+            作者：xundh 发表于2017/4/16 21:26:18 [原文链接](http://blog.csdn.net/xundh/article/details/70198050)
+        &lt;/div&gt;
+        &lt;div&gt;
+        阅读：33 评论：0 [查看评论](http://blog.csdn.net/xundh/article/details/70198050#comments)
+        &lt;/div&gt;
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://xiexiexin.github.io/2017/04/16/原-Hadoop-学习笔记八-Hadoop2-X-64位编译/" data-id="cj2d8br2i000k70m4ehe482vv" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/04/19/原-大数据学习——Mahout入门/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          [原]大数据学习——Mahout入门
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/04/15/原-Sping-学习笔记7——-SpringMVC的restful-服务/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">[原]Sping 学习笔记7—— SpringMVC的restful 服务</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">五月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/06/First-Article/">First Article</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/06/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/03/原-Hadoop-学习笔记十-HA高可用设置/">[原]Hadoop 学习笔记十 HA高可用设置</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/03/原-Hadoop-学习笔记九-任务远程提交-Java远程提交/">[原]Hadoop 学习笔记九 任务远程提交--Java远程提交</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/02/原-Hadoop-学习笔记八-任务远程提交-Eclipse插件/">[原]Hadoop 学习笔记八 任务远程提交--Eclipse插件</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 谢厂节(Cade)<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

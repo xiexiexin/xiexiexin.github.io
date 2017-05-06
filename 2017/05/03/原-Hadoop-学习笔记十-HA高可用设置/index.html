@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>[原]Hadoop 学习笔记十 HA高可用设置 | 谢厂节的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="一、概述早期的hadoop版本，NN是HDFS集群的单点故障点，每个集群只有一个NN。为了解决 个问题，出现了一堆针对HDFS HA的解决方案，如：Linux HA，VMware FI，shared NAS+NFS，BookKeeper，QJM/Quorum Journal Manager，BackupNode等。 1. SPOF方案 Secondary NameNode，并非HA Backup">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[原]Hadoop 学习笔记十 HA高可用设置">
+<meta property="og:url" content="https://xiexiexin.github.io/2017/05/03/原-Hadoop-学习笔记十-HA高可用设置/index.html">
+<meta property="og:site_name" content="谢厂节的博客">
+<meta property="og:description" content="一、概述早期的hadoop版本，NN是HDFS集群的单点故障点，每个集群只有一个NN。为了解决 个问题，出现了一堆针对HDFS HA的解决方案，如：Linux HA，VMware FI，shared NAS+NFS，BookKeeper，QJM/Quorum Journal Manager，BackupNode等。 1. SPOF方案 Secondary NameNode，并非HA Backup">
+<meta property="og:image" content="http://img.blog.csdn.net/20170504134729937?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20170504135015863?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20170504141050434?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20170504141426420?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:image" content="http://img.blog.csdn.net/20170503134311615?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+<meta property="og:updated_time" content="2017-05-06T12:11:32.412Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[原]Hadoop 学习笔记十 HA高可用设置">
+<meta name="twitter:description" content="一、概述早期的hadoop版本，NN是HDFS集群的单点故障点，每个集群只有一个NN。为了解决 个问题，出现了一堆针对HDFS HA的解决方案，如：Linux HA，VMware FI，shared NAS+NFS，BookKeeper，QJM/Quorum Journal Manager，BackupNode等。 1. SPOF方案 Secondary NameNode，并非HA Backup">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20170504134729937?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast">
+  
+    <link rel="alternate" href="/atom.xml" title="谢厂节的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">谢厂节的博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">技术小栈</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://xiexiexin.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-原-Hadoop-学习笔记十-HA高可用设置" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/05/03/原-Hadoop-学习笔记十-HA高可用设置/" class="article-date">
+  <time datetime="2017-05-03T08:58:04.000Z" itemprop="datePublished">2017-05-03</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      [原]Hadoop 学习笔记十 HA高可用设置
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>早期的hadoop版本，NN是HDFS集群的单点故障点，每个集群只有一个NN。为了解决 个问题，出现了一堆针对HDFS HA的解决方案，如：Linux HA，VMware FI，shared NAS+NFS，BookKeeper，QJM/Quorum Journal Manager，BackupNode等。</p>
+<h3 id="1-SPOF方案"><a href="#1-SPOF方案" class="headerlink" title="1. SPOF方案"></a>1. SPOF方案</h3><ol>
+<li>Secondary NameNode，并非HA</li>
+<li>Backup NameNode：在内存中复制了NN的当前状态，算是Warm Standby，并没有failover。</li>
+<li>手动把name.dir指向NFS，这是安全的Code Standby，可以保证元数据不丢失，但集群的恢复完全靠手动</li>
+<li>Facebook AvatarNode</li>
+</ol>
+<p><img src="http://img.blog.csdn.net/20170504134729937?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"> </p>
+<p><em>其设计思想与Hadoop2.0的HA非常相似。</em></p>
+<ul>
+<li>PrimaryNN与StandbyNN之间通过NFS来共享FsEdits、FsImage文件，这样主备NN之间就拥有了一致的目录树和block信息；而block的位置信息，可以根据DN向两个NN上报的信息过程中构建起来。这样再辅以虚IP，可以较好达到主备NN快速热切的目的。但这里的NFS又引入了新的SPOF</li>
+<li>在主备NN共享元数据的过程中，也有方案通过主NN将FsEdits的内容通过与备NN建立的网络IO流，实时写入备NN，并且保证整个过程的原子性。这种方案，解决了NFS共享元数据引入的SPOF，但是主备NN之间的网络连接又会成为新的问题</li>
+</ul>
+<h3 id="2-hadoop2-X-HA原理"><a href="#2-hadoop2-X-HA原理" class="headerlink" title="2. hadoop2.X HA原理"></a>2. hadoop2.X HA原理</h3><p>Clouera提出了QJM/Qurom Journal Manager，这是基于Paxos算法实现的HDFS HA方案。 </p>
+<p><img src="http://img.blog.csdn.net/20170504135015863?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<ul>
+<li>基本原理 用2N+1台JN存储EditLog，每次写操作有大多数（&gt;=N+1）返回成功时即认为该次写成功，数据不会丢失了。这个算法能容忍的最多有N台机器挂掉。</li>
+<li>HA架构里SecondaryNameNode不存在了，standby NN与Active NN使用JournalNode交互。</li>
+<li>发生故障时，Active的NN挂掉，Standby NN会在成为Active NN前，读取所有的JN里的修改日志，这样能高可靠的保证与挂掉的NN的目录镜像树一致，然后无缝的接替它的职责，维护来自客户端请求，从而达到一个高可用的目的</li>
+<li>QJM方式来实现HA的主要优势<br>– 不需要配置额外的高共享存储，降低了复杂度和维护成本<br>– 消除spof<br>–系统鲁棒性（Robust：健壮）的程度是可配置<br>–JN不会因为其中一台的延迟而影响整体的延迟，而且不会因为JN的数量增多而影响性能。（NN向JN发送日志是并行的）</li>
+<li>客户端fencing：确保只有一个NN能响应客户端请求，让访问standby nn的客户端直接失败。在RPC层封装了一层，通过FailoverProxyProvider以重试的方式连接NN。通过若干次连接一个NN失败后尝试连接新的NN，对客户端的影响是重试的时候增加一定的延迟。客户端可以设置重试次数和时间。</li>
+<li>Hadoop提供了ZKFailoverController角色，部署在每个NameNode的节点上，作为一个deamon进程, 简称zkfc<br><img src="http://img.blog.csdn.net/20170504141050434?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></li>
+</ul>
+<p>ZKFailoverController主要包括三个组件： </p>
+<p> – HealthMonitor </p>
+<p> – ActiveStatndbyElector：管理和监控自己在ZK中的状态 </p>
+<p> – ZKFailoverController：订阅HealthMonitor 和ActiveStandbyElector 的事件，并管理NameNode的状态</p>
+<h3 id="3-Hadoop2-x-Federation："><a href="#3-Hadoop2-x-Federation：" class="headerlink" title="3.Hadoop2.x Federation："></a>3.Hadoop2.x Federation：</h3><p>单Active NN的架构使得HDFS在集群扩展性和性能上都有潜在的问题，当集群大到一定程度后，NN进程使用的内存可能会达到上百G，NN成为了性能的瓶颈。 </p>
+<p>Hadoop 2.x提供了HDFS Federation： </p>
+<p><img src="http://img.blog.csdn.net/20170504141426420?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>Hadoop2中NameNode可以不止一个。一个是active状态，另一个是standby状态，当集群运行时，active状态的NameNode是正常工作的，standby状态的NameNode是待命状态的，时刻同步active状态NameNode的数据。</p>
+<p>新HDFS采用一种共享机制，Quorum Journal Node（JournalNode）集群或者Nnetwork File System（NFS）进行共享。NFS是操作系统层面的，JournalNode是Hadoop层面的。主流的作法是使用JournalNode集群进行数据共享。</p>
+<p>JournalNode架构图： </p>
+<p><img src="http://img.blog.csdn.net/20170503134311615?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>两个NameNode为了数据同步，会通过一组JournalNodes的独立进程进行相互通信。当active状态的NameNode命名空间有任何修改时，会告知大部分的JournalNodes进程。StandBy状态的NameNode有能力读取JNs中的变更信息，并且一直监控edit log的变化，把变化应用于自己的命名空间。standby可以确保在集群出错时，命名空间状态已经完全同步了。</p>
+<p>HA确保同一时刻只有一个NameNode处于Active状态，使用ZooKeeper实现这一点。</p>
+<h2 id="二、HA集群的搭建"><a href="#二、HA集群的搭建" class="headerlink" title="二、HA集群的搭建"></a>二、HA集群的搭建</h2><h3 id="NameNode的HA"><a href="#NameNode的HA" class="headerlink" title="NameNode的HA"></a>NameNode的HA</h3><p>配置</p>
+<ul>
+<li>core-site.xml</li>
+<li>hdfs-site.xml</li>
+</ul>
+<h3 id="ResourceManager-HA"><a href="#ResourceManager-HA" class="headerlink" title="ResourceManager HA"></a>ResourceManager HA</h3><p>配置</p>
+<ul>
+<li>yarn-site.xml</li>
+</ul>
+<p><strong>测试环境</strong></p>
+<table><br><thead><br><tr><br>  <th>主机名</th><br>  <th>IP</th><br>  <th>NameNode</th><br>  <th>DataNode</th><br>  <th>Yarn</th><br>  <th>Zookeeper</th><br>  <th>JournalNode</th><br></tr><br></thead><br><tbody><tr><br>  <td>master1.hadoop</td><br>  <td>192.10.200.2</td><br>  <td>是</td><br>  <td>是</td><br>  <td>否</td><br>  <td>是</td><br>  <td>是</td><br></tr><br><tr><br>  <td>master2.hadoop</td><br>  <td>192.10.200.3</td><br>  <td>是</td><br>  <td>是</td><br>  <td>否</td><br>  <td>是</td><br>  <td>是</td><br></tr><br><tr><br>  <td>slave1.hadoop</td><br>  <td>192.10.200.4</td><br>  <td>是</td><br>  <td>是</td><br>  <td>否</td><br>  <td>是</td><br>  <td>是</td><br></tr><br><tr><br>  <td>slave2.hadoop</td><br>  <td>192.10.200.5</td><br>  <td>否</td><br>  <td>是</td><br>  <td>是</td><br>  <td>是</td><br>  <td>是</td><br></tr><br></tbody></table>
+
+<h3 id="核心配置文件"><a href="#核心配置文件" class="headerlink" title="核心配置文件"></a>核心配置文件</h3><p><strong>core-sites.xml</strong></p>
+<pre><code>&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;configuration&lt;/span&gt;&amp;gt;&lt;/span&gt;
+ &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 指定hdfs的nameservice为ns --&amp;gt;&lt;/span&gt;
+ &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;fs.defaultFS&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;hdfs://ns&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+ &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+ &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!--指定hadoop数据临时存放目录--&amp;gt;&lt;/span&gt;
+ &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;hadoop.tmp.dir&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;/home/hadoop/workspace/hdfs/temp&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+ &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;   
+
+ &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;io.file.buffer.size&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;4096&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+ &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+ &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!--指定zookeeper地址--&amp;gt;&lt;/span&gt;
+ &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;ha.zookeeper.quorum&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;slave1.hadoop:2181,slave2.hadoop:2181,master2.hadoop:2181&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+ &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+ &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;configuration&lt;/span&gt;&amp;gt;&lt;/span&gt;`&lt;/pre&gt;
+
+**hdfs-site.xml**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;configuration&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!--指定hdfs的nameservice为ns，需要和core-site.xml中的保持一致 --&amp;gt;&lt;/span&gt;    
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.nameservices&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;ns&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- ns下面有两个NameNode，分别是nn1，nn2 --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+       &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.ha.namenodes.ns&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+       &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;nn1,nn2&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- nn1的RPC通信地址 --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+       &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.namenode.rpc-address.ns.nn1&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+       &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;master1.hadoop:9000&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- nn1的http通信地址 --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.namenode.http-address.ns.nn1&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;slave1.hadoop:50070&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- nn2的RPC通信地址 --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.namenode.rpc-address.ns.nn2&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;slave2.hadoop:9000&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- nn2的http通信地址 --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.namenode.http-address.ns.nn2&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;master2.hadoop:50070&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 指定NameNode的元数据在JournalNode上的存放位置 --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+         &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.namenode.shared.edits.dir&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+         &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;qjournal://master1.hadoop:8485;master2.hadoop:8485/ns&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 指定JournalNode在本地磁盘存放数据的位置 --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+          &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.journalnode.edits.dir&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+          &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;/home/hadoop/workspace/journal&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 开启NameNode故障时自动切换 --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+          &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.ha.automatic-failover.enabled&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+          &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;true&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 配置失败自动切换实现方式 --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.client.failover.proxy.provider.ns&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 配置隔离机制 --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+             &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.ha.fencing.methods&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+             &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;sshfence&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 使用隔离机制时需要ssh免登陆 --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.ha.fencing.ssh.private-key-files&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;/home/hadoop/.ssh/id_rsa&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.namenode.name.dir&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;file:///home/hadoop/workspace/hdfs/name&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.datanode.data.dir&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;file:///home/hadoop/workspace/hdfs/data&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+       &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.replication&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+       &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;2&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;   
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 在NN和DN上开启WebHDFS (REST API)功能,不是必须 --&amp;gt;&lt;/span&gt;                                                                    
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+       &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;dfs.webhdfs.enabled&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+       &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;true&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;configuration&lt;/span&gt;&amp;gt;&lt;/span&gt;`&lt;/pre&gt;
+
+**mapred-site.xml**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;configuration&lt;/span&gt;&amp;gt;&lt;/span&gt;
+ &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;mapreduce.framework.name&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+        &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;yarn&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+ &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;configuration&lt;/span&gt;&amp;gt;&lt;/span&gt;`&lt;/pre&gt;
+
+**yarn-site.xml**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;configuration&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 指定nodemanager启动时加载server的方式为shuffle server --&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+            &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;yarn.nodemanager.aux-services&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+            &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;mapreduce_shuffle&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;    
+     &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;  
+     &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 指定resourcemanager地址 --&amp;gt;&lt;/span&gt;
+     &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;yarn.resourcemanager.hostname&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;name&lt;/span&gt;&amp;gt;&lt;/span&gt;
+            &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;slave1.hadoop&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;value&lt;/span&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt; 
+&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;configuration&lt;/span&gt;&amp;gt;&lt;/span&gt;`&lt;/pre&gt;
+
+**查看master1 slaves**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`/home/hadoop/hadoop-&lt;span class=&quot;hljs-number&quot;&gt;2.7&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.3&lt;/span&gt;/etc/hadoop
+&lt;span class=&quot;hljs-built_in&quot;&gt;cat&lt;/span&gt; slaves`&lt;/pre&gt;
+
+**启动zookeeper集群** 
+
+在slave1 slave2 master2执行
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`/opt/zookeeper-3.5.2-alpha/bin/zkServer.sh &lt;span class=&quot;hljs-operator&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;start&lt;/span&gt;&lt;/span&gt;`&lt;/pre&gt;
+
+**启动journalnode集群 **
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`sbin/hadoop-damons.sh &lt;span class=&quot;hljs-operator&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;start&lt;/span&gt; journalnode&lt;/span&gt;`&lt;/pre&gt;
+
+**格式化zkfc**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`hdfs zkfc &lt;span class=&quot;hljs-attribute&quot;&gt;-formatZK&lt;/span&gt;
+zkCli&lt;span class=&quot;hljs-built_in&quot;&gt;.&lt;/span&gt;sh &lt;span class=&quot;hljs-attribute&quot;&gt;-server&lt;/span&gt; &lt;span class=&quot;hljs-number&quot;&gt;127.0&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.0&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.1&lt;/span&gt;:&lt;span class=&quot;hljs-number&quot;&gt;2181&lt;/span&gt;
+ls /hadoop&lt;span class=&quot;hljs-attribute&quot;&gt;-ha&lt;/span&gt;`&lt;/pre&gt;
+
+会输出[ns] 
+
+**格式化hdfs**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`hadoop namenode -&lt;span class=&quot;hljs-built_in&quot;&gt;format&lt;/span&gt;`&lt;/pre&gt;
+
+**在master1启动namenode**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`./hadoop-daemon.sh &lt;span class=&quot;hljs-operator&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;start&lt;/span&gt; namenode&lt;/span&gt;`&lt;/pre&gt;
+
+**在master2同步namenode数据，同时启动standby的namenode**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`hdfs namenode &lt;span class=&quot;hljs-attribute&quot;&gt;-bootstrapStandby&lt;/span&gt;
+&lt;span class=&quot;hljs-built_in&quot;&gt;.&lt;/span&gt;/hadoop&lt;span class=&quot;hljs-attribute&quot;&gt;-daemon&lt;/span&gt;&lt;span class=&quot;hljs-built_in&quot;&gt;.&lt;/span&gt;sh start namenode`&lt;/pre&gt;
+
+**在master1上启动datanode**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`./hadoop-daemon.sh &lt;span class=&quot;hljs-operator&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;start&lt;/span&gt; datanode&lt;/span&gt;`&lt;/pre&gt;
+
+**启动yarn，在slave2运行**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`./&lt;span class=&quot;hljs-operator&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;start&lt;/span&gt;-yarn.sh&lt;/span&gt;`&lt;/pre&gt;
+
+**查看rm状态**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`yarn rmadmin &lt;span class=&quot;hljs-attribute&quot;&gt;-getServiceState&lt;/span&gt; rm1
+active
+yarn rmadmin &lt;span class=&quot;hljs-attribute&quot;&gt;-getServiceState&lt;/span&gt; rm2
+standby`&lt;/pre&gt;
+
+**切换NN**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`hdfs haadmin &lt;span class=&quot;hljs-attribute&quot;&gt;-DFSHAadmin&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;-transitionToActive&lt;/span&gt; master&lt;span class=&quot;hljs-built_in&quot;&gt;.&lt;/span&gt;hadoop`&lt;/pre&gt;
+
+**让rm2 active**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`hdfs haadmin -DFSHAadmin -failover  master&lt;span class=&quot;hljs-preprocessor&quot;&gt;.hadoop&lt;/span&gt; slave3&lt;span class=&quot;hljs-preprocessor&quot;&gt;.hadoop&lt;/span&gt;`&lt;/pre&gt;
+
+**启动zkfc，在master1运行**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`sbin/hadoop-daemons.sh &lt;span class=&quot;hljs-operator&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;start&lt;/span&gt; zkfc&lt;/span&gt;
+</code></pre><p>参考文章： </p>
+<p><a href="http://www.cnblogs.com/tgzhu/p/5790565.html" target="_blank" rel="external">http://www.cnblogs.com/tgzhu/p/5790565.html</a> </p>
+<p><a href="http://www.open-open.com/lib/view/open1436855630959.html" target="_blank" rel="external">http://www.open-open.com/lib/view/open1436855630959.html</a></p>
+<pre><code>&lt;div&gt;
+    作者：xundh 发表于2017/5/3 16:58:04 [原文链接](http://blog.csdn.net/xundh/article/details/71126098)
+&lt;/div&gt;
+&lt;div&gt;
+阅读：39 评论：0 [查看评论](http://blog.csdn.net/xundh/article/details/71126098#comments)
+&lt;/div&gt;
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://xiexiexin.github.io/2017/05/03/原-Hadoop-学习笔记十-HA高可用设置/" data-id="cj2d8br0p000770m4k4yxpxds" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/05/06/hello-world/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Hello World
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/05/03/原-Hadoop-学习笔记九-任务远程提交-Java远程提交/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">[原]Hadoop 学习笔记九 任务远程提交--Java远程提交</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">五月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/06/First-Article/">First Article</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/06/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/03/原-Hadoop-学习笔记十-HA高可用设置/">[原]Hadoop 学习笔记十 HA高可用设置</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/03/原-Hadoop-学习笔记九-任务远程提交-Java远程提交/">[原]Hadoop 学习笔记九 任务远程提交--Java远程提交</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/02/原-Hadoop-学习笔记八-任务远程提交-Eclipse插件/">[原]Hadoop 学习笔记八 任务远程提交--Eclipse插件</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 谢厂节(Cade)<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

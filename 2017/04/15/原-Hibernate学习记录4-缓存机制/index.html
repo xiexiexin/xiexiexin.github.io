@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>[原]Hibernate学习记录4 缓存机制 | 谢厂节的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Hibernate缓存有两级:一级缓存 session级别的缓存概念它属于事务范围的缓存。它只存在于Session的生命周期。程序调用save(),update(),saveorupdate()等方法及调用查询接口 list,filter,iterate时，如果session缓存没有相应的对像，就会自动加入到一级缓存里。   session关闭时，其管理的一级缓存也会被清除。   一级缓存不能进行">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[原]Hibernate学习记录4 缓存机制">
+<meta property="og:url" content="https://xiexiexin.github.io/2017/04/15/原-Hibernate学习记录4-缓存机制/index.html">
+<meta property="og:site_name" content="谢厂节的博客">
+<meta property="og:description" content="Hibernate缓存有两级:一级缓存 session级别的缓存概念它属于事务范围的缓存。它只存在于Session的生命周期。程序调用save(),update(),saveorupdate()等方法及调用查询接口 list,filter,iterate时，如果session缓存没有相应的对像，就会自动加入到一级缓存里。   session关闭时，其管理的一级缓存也会被清除。   一级缓存不能进行">
+<meta property="og:updated_time" content="2017-05-06T12:11:32.416Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[原]Hibernate学习记录4 缓存机制">
+<meta name="twitter:description" content="Hibernate缓存有两级:一级缓存 session级别的缓存概念它属于事务范围的缓存。它只存在于Session的生命周期。程序调用save(),update(),saveorupdate()等方法及调用查询接口 list,filter,iterate时，如果session缓存没有相应的对像，就会自动加入到一级缓存里。   session关闭时，其管理的一级缓存也会被清除。   一级缓存不能进行">
+  
+    <link rel="alternate" href="/atom.xml" title="谢厂节的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">谢厂节的博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">技术小栈</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://xiexiexin.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-原-Hibernate学习记录4-缓存机制" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/15/原-Hibernate学习记录4-缓存机制/" class="article-date">
+  <time datetime="2017-04-15T07:45:59.000Z" itemprop="datePublished">2017-04-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      [原]Hibernate学习记录4 缓存机制
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="Hibernate缓存有两级"><a href="#Hibernate缓存有两级" class="headerlink" title="Hibernate缓存有两级:"></a>Hibernate缓存有两级:</h2><h3 id="一级缓存-session级别的缓存"><a href="#一级缓存-session级别的缓存" class="headerlink" title="一级缓存 session级别的缓存"></a>一级缓存 session级别的缓存</h3><h4 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h4><p>它属于事务范围的缓存。它只存在于Session的生命周期。程序调用save(),update(),saveorupdate()等方法及调用查询接口 list,filter,iterate时，如果session缓存没有相应的对像，就会自动加入到一级缓存里。 </p>
+<p> session关闭时，其管理的一级缓存也会被清除。 </p>
+<p> 一级缓存不能进行配置，不能卸载。 </p>
+<p> 一级缓存的内部结果就是map</p>
+<h4 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h4><ul>
+<li>session.evict() : 将某个对象从Session的一级缓存中清除</li>
+<li>session.clear(): 将一级缓存中的所有对象清除</li>
+</ul>
+<h3 id="二级缓存-SessionFactory级别的缓存"><a href="#二级缓存-SessionFactory级别的缓存" class="headerlink" title="二级缓存  SessionFactory级别的缓存"></a>二级缓存  SessionFactory级别的缓存</h3><p>这一级别的缓存可以配置和更改，动态的加载和卸载，属于进程级缓存，可以让所有的session共享。 </p>
+<p>二级缓存的生命周期与SessionFactory一致，由SessionFactory管理二级缓存。 </p>
+<p>二级缓存是HashTable结构，只能保持实体对象，不能保存属性。</p>
+<p>二级缓存默认是打开的。设置的方式是：</p>
+<pre><code>hibernate&lt;span class=&quot;hljs-preprocessor&quot;&gt;.cache&lt;/span&gt;&lt;span class=&quot;hljs-preprocessor&quot;&gt;.use&lt;/span&gt;_query_cache=true`&lt;/pre&gt;
+
+或者在hibernate.cfg.xml设置
+
+#### 配置方式：
+
+hibernate.cfg.xml
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 指明二级缓存的提供商 --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;cache.provider_class&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;
+org.hibernate.cache.EhCacheProvider
+&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+
+&lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 是否开启二级缓存，true开启二级缓存，false关闭二级缓存 --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;cache.use_second_level_cache&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;true&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+
+&lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 指定把那个对象放入二级缓存当中 --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;class-cache&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;com.tarena.po.Student&quot;&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;usage&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;read-only&quot;&lt;/span&gt;/&amp;gt;&lt;/span&gt;`&lt;/pre&gt;
+
+ehcache.xml
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-comment&quot;&gt;//在该二级缓存中，最多可以缓存对象的数量&lt;/span&gt;
+maxElementsInMemory=&lt;span class=&quot;hljs-string&quot;&gt;&quot;1000&quot;&lt;/span&gt; 
+
+&lt;span class=&quot;hljs-comment&quot;&gt;//缓存在二级缓存中的对象是否永远都有效，一般配置为false&lt;/span&gt;
+eternal=&lt;span class=&quot;hljs-string&quot;&gt;&quot;true&quot;&lt;/span&gt;
+
+&lt;span class=&quot;hljs-comment&quot;&gt;//&quot;钝化&quot;：两次访问该二级缓存中对象的，间隔时间&lt;/span&gt;
+timeToIdleSeconds=&lt;span class=&quot;hljs-string&quot;&gt;&quot;120&quot;&lt;/span&gt;
+
+&lt;span class=&quot;hljs-comment&quot;&gt;//二级缓存中的对象从创建到消亡的时间  &lt;/span&gt;
+timeToLiveSeconds=&lt;span class=&quot;hljs-string&quot;&gt;&quot;120&quot;&lt;/span&gt;
+
+&lt;span class=&quot;hljs-comment&quot;&gt;//如果超过缓存的访问，可以写入到硬盘上的&lt;/span&gt;
+overflowToDisk=&lt;span class=&quot;hljs-string&quot;&gt;&quot;true&quot;&lt;/span&gt;`&lt;/pre&gt;
+
+#### 二级缓存的管理
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`使用SessionFactory来管理我们的二级缓存
+
+首先修改HibernateUtil，添加获得SessionFactory的方法
+SessionFactory factory = HibernateUtil2&lt;span class=&quot;hljs-preprocessor&quot;&gt;.getSessionFactory&lt;/span&gt;()&lt;span class=&quot;hljs-comment&quot;&gt;;&lt;/span&gt;
+
+factory&lt;span class=&quot;hljs-preprocessor&quot;&gt;.evict&lt;/span&gt;(Student&lt;span class=&quot;hljs-preprocessor&quot;&gt;.class&lt;/span&gt;,&lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;)&lt;span class=&quot;hljs-comment&quot;&gt;;//去掉二级缓存中id为1的student对象&lt;/span&gt;
+factory&lt;span class=&quot;hljs-preprocessor&quot;&gt;.evict&lt;/span&gt;(Student&lt;span class=&quot;hljs-preprocessor&quot;&gt;.class&lt;/span&gt;)&lt;span class=&quot;hljs-comment&quot;&gt;;//去掉二级缓存中所有的student对象&lt;/span&gt;`&lt;/pre&gt;
+
+#### 缓存读取流程
+
+Hibernate将第一次读取的内容放到缓存 
+
+如果数据库被其它程序修改，Hibernate这时读取的数据仍是缓存数据。（先从一级缓存读，如果没有则从二级缓存读）。
+
+### 查询缓存
+
+另外Hibernate为查询结果提供了一个查询缓存，依赖于第二级缓存。 
+
+查询用来保存属性的，对实体结果集只保存id 
+
+查询缓存的生命周期，只有当前表发生改变，查询缓存的生命周期结束
+
+#### 使用查询缓存
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`修改hibernate.cfg.xml文件，开启查询缓存
+&lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!-- 是否开启查询缓存,true开启查询缓存，false关闭查询缓存 --&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;cache.use_query_cache&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;true&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;property&lt;/span&gt;&amp;gt;&lt;/span&gt;
+`&lt;/pre&gt;
+
+在Query对象中必须手动开启查询缓存
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`create&lt;span class=&quot;hljs-variable&quot;&gt;SQLQuery&lt;/span&gt;创建的&lt;span class=&quot;hljs-variable&quot;&gt;SQLQuery&lt;/span&gt;对象&lt;span class=&quot;hljs-keyword&quot;&gt;query&lt;/span&gt;中设置
+&lt;span class=&quot;hljs-keyword&quot;&gt;query&lt;/span&gt;.set&lt;span class=&quot;hljs-variable&quot;&gt;CacheMode&lt;/span&gt;(&lt;span class=&quot;hljs-variable&quot;&gt;CacheMode&lt;/span&gt;.&lt;span class=&quot;hljs-variable&quot;&gt;IGNORE&lt;/span&gt;);
+读取数据时，不和二级缓存交换数据，直接读取数据库
+
+        &lt;div&gt;
+            作者：xundh 发表于2017/4/15 15:45:59 [原文链接](http://blog.csdn.net/xundh/article/details/70184895)
+        &lt;/div&gt;
+        &lt;div&gt;
+        阅读：25 评论：0 [查看评论](http://blog.csdn.net/xundh/article/details/70184895#comments)
+        &lt;/div&gt;
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://xiexiexin.github.io/2017/04/15/原-Hibernate学习记录4-缓存机制/" data-id="cj2d8br1q000e70m4j8xasku3" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/04/15/原-Hibernate学习记录5-配置C3P0/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          [原]Hibernate学习记录5 配置C3P0
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/04/15/原-Hibernate学习记录3-Hibernate-配置多数据源/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">[原]Hibernate学习记录3 Hibernate 配置多数据源</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">五月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/06/First-Article/">First Article</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/06/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/03/原-Hadoop-学习笔记十-HA高可用设置/">[原]Hadoop 学习笔记十 HA高可用设置</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/03/原-Hadoop-学习笔记九-任务远程提交-Java远程提交/">[原]Hadoop 学习笔记九 任务远程提交--Java远程提交</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/02/原-Hadoop-学习笔记八-任务远程提交-Eclipse插件/">[原]Hadoop 学习笔记八 任务远程提交--Eclipse插件</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 谢厂节(Cade)<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

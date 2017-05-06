@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>[原]ASP.NET Spring.Net 入门1 简单入门示例 | 谢厂节的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Spring.Net 简介 从http://www.springframework.net/download.html 下载spring.NET，解压后得到源码和编译好的dll 新建项目 添加Common.Logging.dll、Spring.Core.dll引用  Spring.Net的IOC配置可以采用独立的xml，也可以使用应用程序的配置文件。 配置写入应用程序配置文件中&amp;lt;span c">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[原]ASP.NET Spring.Net 入门1 简单入门示例">
+<meta property="og:url" content="https://xiexiexin.github.io/2017/04/21/原-ASP-NET-Spring-Net-入门1-简单入门示例/index.html">
+<meta property="og:site_name" content="谢厂节的博客">
+<meta property="og:description" content="Spring.Net 简介 从http://www.springframework.net/download.html 下载spring.NET，解压后得到源码和编译好的dll 新建项目 添加Common.Logging.dll、Spring.Core.dll引用  Spring.Net的IOC配置可以采用独立的xml，也可以使用应用程序的配置文件。 配置写入应用程序配置文件中&amp;lt;span c">
+<meta property="og:updated_time" content="2017-05-06T12:11:32.415Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[原]ASP.NET Spring.Net 入门1 简单入门示例">
+<meta name="twitter:description" content="Spring.Net 简介 从http://www.springframework.net/download.html 下载spring.NET，解压后得到源码和编译好的dll 新建项目 添加Common.Logging.dll、Spring.Core.dll引用  Spring.Net的IOC配置可以采用独立的xml，也可以使用应用程序的配置文件。 配置写入应用程序配置文件中&amp;lt;span c">
+  
+    <link rel="alternate" href="/atom.xml" title="谢厂节的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">谢厂节的博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">技术小栈</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://xiexiexin.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-原-ASP-NET-Spring-Net-入门1-简单入门示例" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/21/原-ASP-NET-Spring-Net-入门1-简单入门示例/" class="article-date">
+  <time datetime="2017-04-21T13:57:32.000Z" itemprop="datePublished">2017-04-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      [原]ASP.NET Spring.Net 入门1 简单入门示例
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Spring-Net"><a href="#Spring-Net" class="headerlink" title="Spring.Net"></a>Spring.Net</h1><hr>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><ul>
+<li>从<a href="http://www.springframework.net/download.html" target="_blank" rel="external">http://www.springframework.net/download.html</a> 下载spring.NET，解压后得到源码和编译好的dll</li>
+<li>新建项目</li>
+<li>添加Common.Logging.dll、Spring.Core.dll引用</li>
+</ul>
+<p>Spring.Net的IOC配置可以采用独立的xml，也可以使用应用程序的配置文件。</p>
+<h3 id="配置写入应用程序配置文件中"><a href="#配置写入应用程序配置文件中" class="headerlink" title="配置写入应用程序配置文件中"></a>配置写入应用程序配置文件中</h3><pre><code>&lt;span class=&quot;hljs-pi&quot;&gt;&amp;lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;configuration&lt;/span&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!--一定要在紧跟着configuration下面添加--&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;configSections&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!--跟下面Spring.Net节点配置是一一对应关系--&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;sectionGroup&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;spring&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;section&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;context&quot;&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;type&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;Spring.Context.Support.ContextHandler, Spring.Core&quot;&lt;/span&gt;/&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;section&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;objects&quot;&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;type&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;Spring.Context.Support.DefaultSectionHandler, Spring.Core&quot;&lt;/span&gt; /&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;sectionGroup&lt;/span&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;configSections&lt;/span&gt;&amp;gt;&lt;/span&gt;
+
+  &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;startup&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;supportedRuntime&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;version&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;v4.0&quot;&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;sku&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;.NETFramework,Version=v4.5&quot;&lt;/span&gt; /&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;startup&lt;/span&gt;&amp;gt;&lt;/span&gt;
+
+  &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!--Spring.Net节点配置--&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;spring&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;context&lt;/span&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!--容器配置--&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;resource&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;uri&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;config://spring/objects&quot;&lt;/span&gt;/&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;context&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;objects&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;xmlns&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;http://www.springframework.net&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!--这里放容器里面的所有节点--&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;description&lt;/span&gt;&amp;gt;&lt;/span&gt;An  example that demonstrates simple IoC features.&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;description&lt;/span&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;hljs-comment&quot;&gt;&amp;lt;!--name 必须要唯一的，type=类的全名称，所在的程序集--&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;&lt;span class=&quot;hljs-title&quot;&gt;object&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;UserInfoDal&quot;&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;type&lt;/span&gt;=&lt;span class=&quot;hljs-value&quot;&gt;&quot;Spring.Net.EFUserInfoDal&quot;&lt;/span&gt;&amp;gt;&lt;/span&gt;
+      &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;object&lt;/span&gt;&amp;gt;&lt;/span&gt;
+    &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;objects&lt;/span&gt;&amp;gt;&lt;/span&gt;
+  &lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;spring&lt;/span&gt;&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;hljs-tag&quot;&gt;&amp;lt;/&lt;span class=&quot;hljs-title&quot;&gt;configuration&lt;/span&gt;&amp;gt;&lt;/span&gt;`&lt;/pre&gt;
+
+## Program.cs
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-keyword&quot;&gt;using&lt;/span&gt; Spring.Context;
+&lt;span class=&quot;hljs-keyword&quot;&gt;using&lt;/span&gt; Spring.Context.Support;
+&lt;span class=&quot;hljs-keyword&quot;&gt;using&lt;/span&gt; Spring.Net;
+&lt;span class=&quot;hljs-keyword&quot;&gt;using&lt;/span&gt; System;
+
+&lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;namespace&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;ConsoleApplication1&lt;/span&gt;
+{&lt;/span&gt;
+    &lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;Program&lt;/span&gt;
+    {&lt;/span&gt;
+        &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; Main(&lt;span class=&quot;hljs-keyword&quot;&gt;string&lt;/span&gt;[] args)
+        {
+            &lt;span class=&quot;hljs-comment&quot;&gt;//Spring.Net 创建实例的方式转为容器帮我们创建&lt;/span&gt;
+            &lt;span class=&quot;hljs-comment&quot;&gt;//创建spring容器上下文&lt;/span&gt;
+            IApplicationContext ctx = ContextRegistry.GetContext();
+            &lt;span class=&quot;hljs-comment&quot;&gt;//通过容器创建对象&lt;/span&gt;
+            IUserInfoDal efDal = ctx.GetObject(&lt;span class=&quot;hljs-string&quot;&gt;&quot;UserInfoDal&quot;&lt;/span&gt;) as IUserInfoDal;
+            efDal.Show();
+            Console.ReadKey();
+        }
+    }
+}`&lt;/pre&gt;
+
+## IUserInfoDal.cs
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`namespace Spring.Net
+{
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;interface&lt;/span&gt; IUserInfoDal
+    {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; Show();
+    }
+}`&lt;/pre&gt;
+
+## EFUserInfoDal
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-keyword&quot;&gt;using&lt;/span&gt; System;
+
+namespace Spring.Net
+{
+   &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; EFUserInfoDal: IUserInfoDal
+    {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;Show&lt;/span&gt;()
+        {
+            Console.WriteLine(&lt;span class=&quot;hljs-string&quot;&gt;&quot;I&apos;m EF Dal&quot;&lt;/span&gt;);
+        }     
+    }
+}
+</code></pre><p>源码地址： </p>
+<p><a href="https://github.com/xiexiexin/SpringNetSample/Test1" target="_blank" rel="external">https://github.com/xiexiexin/SpringNetSample/Test1</a></p>
+<pre><code>&lt;div&gt;
+    作者：xundh 发表于2017/4/21 21:57:32 [原文链接](http://blog.csdn.net/xundh/article/details/70306322)
+&lt;/div&gt;
+&lt;div&gt;
+阅读：45 评论：0 [查看评论](http://blog.csdn.net/xundh/article/details/70306322#comments)
+&lt;/div&gt;
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://xiexiexin.github.io/2017/04/21/原-ASP-NET-Spring-Net-入门1-简单入门示例/" data-id="cj2d8br0b000570m40v3bdmru" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/04/21/原-ASP-NET-Spring-Net-入门2-简单入门示例-属性与构造函数注入/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          [原]ASP.NET Spring.Net 入门2 简单入门示例--属性与构造函数注入
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/04/20/原-大数据学习——Flume介绍与安装/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">[原]大数据学习——Flume介绍与安装</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">五月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/06/First-Article/">First Article</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/06/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/03/原-Hadoop-学习笔记十-HA高可用设置/">[原]Hadoop 学习笔记十 HA高可用设置</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/03/原-Hadoop-学习笔记九-任务远程提交-Java远程提交/">[原]Hadoop 学习笔记九 任务远程提交--Java远程提交</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/02/原-Hadoop-学习笔记八-任务远程提交-Eclipse插件/">[原]Hadoop 学习笔记八 任务远程提交--Eclipse插件</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 谢厂节(Cade)<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

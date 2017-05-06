@@ -3,15 +3,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>First Article | 谢厂节的博客</title>
+  <title>[原]Hadoop 学习笔记九 任务远程提交--Java远程提交 | 谢厂节的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="article">
-<meta property="og:title" content="First Article">
-<meta property="og:url" content="https://xiexiexin.github.io/2017/05/06/First-Article/index.html">
+  <meta name="description" content="Hadoop运行计算任务，大概有以下几种方式  把MapReduce任务打包到jar里，上传到服务器，用命令行启动 通过Java向Hadoop集群提交MapReduce任务 服务器的hadoop配置拷到本地，设置hosts指向namenode和resourcemanager，本地执行hadoop jar 任务做成schedule，定时调用shell脚本运行java任务 Eclipse的hadoop">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[原]Hadoop 学习笔记九 任务远程提交--Java远程提交">
+<meta property="og:url" content="https://xiexiexin.github.io/2017/05/03/原-Hadoop-学习笔记九-任务远程提交-Java远程提交/index.html">
 <meta property="og:site_name" content="谢厂节的博客">
-<meta property="og:updated_time" content="2017-05-06T12:04:04.878Z">
+<meta property="og:description" content="Hadoop运行计算任务，大概有以下几种方式  把MapReduce任务打包到jar里，上传到服务器，用命令行启动 通过Java向Hadoop集群提交MapReduce任务 服务器的hadoop配置拷到本地，设置hosts指向namenode和resourcemanager，本地执行hadoop jar 任务做成schedule，定时调用shell脚本运行java任务 Eclipse的hadoop">
+<meta property="og:updated_time" content="2017-05-06T12:11:32.415Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="First Article">
+<meta name="twitter:title" content="[原]Hadoop 学习笔记九 任务远程提交--Java远程提交">
+<meta name="twitter:description" content="Hadoop运行计算任务，大概有以下几种方式  把MapReduce任务打包到jar里，上传到服务器，用命令行启动 通过Java向Hadoop集群提交MapReduce任务 服务器的hadoop配置拷到本地，设置hosts指向namenode和resourcemanager，本地执行hadoop jar 任务做成schedule，定时调用shell脚本运行java任务 Eclipse的hadoop">
   
     <link rel="alternate" href="/atom.xml" title="谢厂节的博客" type="application/atom+xml">
   
@@ -64,10 +67,10 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-First-Article" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-原-Hadoop-学习笔记九-任务远程提交-Java远程提交" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2017/05/06/First-Article/" class="article-date">
-  <time datetime="2017-05-06T12:04:04.000Z" itemprop="datePublished">2017-05-06</time>
+    <a href="/2017/05/03/原-Hadoop-学习笔记九-任务远程提交-Java远程提交/" class="article-date">
+  <time datetime="2017-05-03T00:30:02.000Z" itemprop="datePublished">2017-05-03</time>
 </a>
     
   </div>
@@ -78,7 +81,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      First Article
+      [原]Hadoop 学习笔记九 任务远程提交--Java远程提交
     </h1>
   
 
@@ -86,11 +89,26 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p><strong>Hadoop运行计算任务，大概有以下几种方式</strong></p>
+<ol>
+<li>把MapReduce任务打包到jar里，上传到服务器，用命令行启动</li>
+<li>通过Java向Hadoop集群提交MapReduce任务</li>
+<li>服务器的hadoop配置拷到本地，设置hosts指向namenode和resourcemanager，本地执行hadoop jar</li>
+<li>任务做成schedule，定时调用shell脚本运行java任务</li>
+<li>Eclipse的hadoop插件</li>
+</ol>
+<p>本文介绍第2种方式</p>
+<pre><code>&lt;div&gt;
+    作者：xundh 发表于2017/5/3 8:30:02 [原文链接](http://blog.csdn.net/xundh/article/details/71106503)
+&lt;/div&gt;
+&lt;div&gt;
+阅读：47 评论：0 [查看评论](http://blog.csdn.net/xundh/article/details/71106503#comments)
+&lt;/div&gt;
+</code></pre>
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://xiexiexin.github.io/2017/05/06/First-Article/" data-id="cj2d8bqzo000170m45r0bqtf4" class="article-share-link">Share</a>
+      <a data-url="https://xiexiexin.github.io/2017/05/03/原-Hadoop-学习笔记九-任务远程提交-Java远程提交/" data-id="cj2d8br0i000670m4kte94vl0" class="article-share-link">Share</a>
       
       
     </footer>
@@ -99,10 +117,19 @@
     
 <nav id="article-nav">
   
+    <a href="/2017/05/03/原-Hadoop-学习笔记十-HA高可用设置/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          [原]Hadoop 学习笔记十 HA高可用设置
+        
+      </div>
+    </a>
   
-    <a href="/2017/05/06/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+  
+    <a href="/2017/05/02/原-Hadoop-学习笔记八-任务远程提交-Eclipse插件/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">Hello World</div>
+      <div class="article-nav-title">[原]Hadoop 学习笔记八 任务远程提交--Eclipse插件</div>
     </a>
   
 </nav>

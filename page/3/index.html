@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>谢厂节的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="谢厂节的博客">
+<meta property="og:url" content="https://xiexiexin.github.io/page/3/index.html">
+<meta property="og:site_name" content="谢厂节的博客">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="谢厂节的博客">
+  
+    <link rel="alternate" href="/atom.xml" title="谢厂节的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">谢厂节的博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">技术小栈</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://xiexiexin.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-原-Hibernate学习记录3-Hibernate-配置多数据源" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/15/原-Hibernate学习记录3-Hibernate-配置多数据源/" class="article-date">
+  <time datetime="2017-04-15T07:38:55.000Z" itemprop="datePublished">2017-04-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/04/15/原-Hibernate学习记录3-Hibernate-配置多数据源/">[原]Hibernate学习记录3 Hibernate 配置多数据源</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="实验环境"><a href="#实验环境" class="headerlink" title="实验环境"></a>实验环境</h1><ul>
+<li>Spring3.1.1</li>
+<li>Hibernate 4.1.4</li>
+<li>Jersey</li>
+</ul>
+<p>示例中只使用了一个secondFactory_second。另一个sessionFactory代码不是处理核心，这里未贴出。</p>
+<h2 id="model定义"><a href="#model定义" class="headerlink" title="model定义"></a>model定义</h2><pre><code>&lt;span class=&quot;hljs-annotation&quot;&gt;@Message&lt;/span&gt; 
+&lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;User&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;implements&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;java&lt;/span&gt;.&lt;span class=&quot;hljs-title&quot;&gt;io&lt;/span&gt;.&lt;span class=&quot;hljs-title&quot;&gt;Serializable&lt;/span&gt; {&lt;/span&gt;
+
+    &lt;span class=&quot;hljs-comment&quot;&gt;// Fields&lt;/span&gt;
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; String userUnid;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; String userLoginName;
+
+    &lt;span class=&quot;hljs-comment&quot;&gt;// Constructors&lt;/span&gt;
+
+    &lt;span class=&quot;hljs-javadoc&quot;&gt;/** default constructor */&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;User&lt;/span&gt;() {
+    }
+
+    &lt;span class=&quot;hljs-javadoc&quot;&gt;/** minimal constructor */&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;User&lt;/span&gt;(String userUnid) {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userUnid = userUnid;
+    }
+
+    &lt;span class=&quot;hljs-javadoc&quot;&gt;/** full constructor */&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;User&lt;/span&gt;(String userUnid, String userLoginName) {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userUnid = userUnid;
+        &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userLoginName = userLoginName;
+    }
+
+    &lt;span class=&quot;hljs-comment&quot;&gt;// Property accessors&lt;/span&gt;
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; String &lt;span class=&quot;hljs-title&quot;&gt;getUserUnid&lt;/span&gt;() {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userUnid;
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;setUserUnid&lt;/span&gt;(String userUnid) {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userUnid = userUnid;
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; String &lt;span class=&quot;hljs-title&quot;&gt;getUserLoginName&lt;/span&gt;() {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userLoginName;
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;setUserLoginName&lt;/span&gt;(String userLoginName) {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.userLoginName = userLoginName;
+    }
+}`&lt;/pre&gt;
+
+## dao
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; java.util.List;
+
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.LockOptions;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.Query;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.criterion.Example;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.slf4j.Logger;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.slf4j.LoggerFactory;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.springframework.context.ApplicationContext;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.springframework.transaction.annotation.Transactional;
+
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; com.cn.hightech.hb.BaseHibernateDAO;
+
+&lt;span class=&quot;hljs-annotation&quot;&gt;@Transactional&lt;/span&gt;
+&lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;UserDAO&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;BaseHibernateDAO&lt;/span&gt; {&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;final&lt;/span&gt; Logger log = LoggerFactory
+            .getLogger(UserDAO.class);
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;final&lt;/span&gt; String USER_LOGIN_NAME = &lt;span class=&quot;hljs-string&quot;&gt;&quot;userLoginName&quot;&lt;/span&gt;;
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;save&lt;/span&gt;(User transientInstance) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;saving User instance&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            getCurrentSession().save(transientInstance);
+            log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;save successful&quot;&lt;/span&gt;);
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;save failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;delete&lt;/span&gt;(User persistentInstance) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;deleting User instance&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            getCurrentSession().delete(persistentInstance);
+            log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;delete successful&quot;&lt;/span&gt;);
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;delete failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; User &lt;span class=&quot;hljs-title&quot;&gt;findById&lt;/span&gt;(java.lang.String id) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;getting User instance with id: &quot;&lt;/span&gt; + id);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            User instance = (User) getCurrentSession().get(
+                    &lt;span class=&quot;hljs-string&quot;&gt;&quot;com.cn.hightech.entity.gx.User&quot;&lt;/span&gt;, id);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; instance;
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;get failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; List &lt;span class=&quot;hljs-title&quot;&gt;findByExample&lt;/span&gt;(User instance) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;finding User instance by example&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            List results = getCurrentSession()
+                    .createCriteria(&lt;span class=&quot;hljs-string&quot;&gt;&quot;com.cn.hightech.entity.gx.User&quot;&lt;/span&gt;)
+                    .add(Example.create(instance)).list();
+            log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;find by example successful, result size: &quot;&lt;/span&gt;
+                    + results.size());
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; results;
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;find by example failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; List &lt;span class=&quot;hljs-title&quot;&gt;findByProperty&lt;/span&gt;(String propertyName, Object value) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;finding User instance with property: &quot;&lt;/span&gt; + propertyName
+                + &lt;span class=&quot;hljs-string&quot;&gt;&quot;, value: &quot;&lt;/span&gt; + value);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            String queryString = &lt;span class=&quot;hljs-string&quot;&gt;&quot;from User as model where model.&quot;&lt;/span&gt;
+                    + propertyName + &lt;span class=&quot;hljs-string&quot;&gt;&quot;= ?&quot;&lt;/span&gt;;
+            Query queryObject = getCurrentSession().createQuery(queryString);
+            queryObject.setParameter(&lt;span class=&quot;hljs-number&quot;&gt;0&lt;/span&gt;, value);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; queryObject.list();
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;find by property name failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; List &lt;span class=&quot;hljs-title&quot;&gt;findByUserLoginName&lt;/span&gt;(Object userLoginName) {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; findByProperty(USER_LOGIN_NAME, userLoginName);
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; List &lt;span class=&quot;hljs-title&quot;&gt;findAll&lt;/span&gt;() {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;finding all User instances&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            String queryString = &lt;span class=&quot;hljs-string&quot;&gt;&quot;from User&quot;&lt;/span&gt;;
+            Query queryObject = getCurrentSession().createQuery(queryString);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; queryObject.list();
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;find all failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; User &lt;span class=&quot;hljs-title&quot;&gt;merge&lt;/span&gt;(User detachedInstance) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;merging User instance&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            User result = (User) getCurrentSession().merge(
+                    detachedInstance);
+            log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;merge successful&quot;&lt;/span&gt;);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; result;
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;merge failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;attachDirty&lt;/span&gt;(User instance) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;attaching dirty User instance&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            getCurrentSession().saveOrUpdate(instance);
+            log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;attach successful&quot;&lt;/span&gt;);
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;attach failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;attachClean&lt;/span&gt;(User instance) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;attaching clean User instance&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            getCurrentSession().buildLockRequest(LockOptions.NONE).lock(
+                    instance);
+            log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;attach successful&quot;&lt;/span&gt;);
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;attach failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@SuppressWarnings&lt;/span&gt;(&lt;span class=&quot;hljs-string&quot;&gt;&quot;unchecked&quot;&lt;/span&gt;)
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; List&amp;lt;User&amp;gt; &lt;span class=&quot;hljs-title&quot;&gt;findByPage&lt;/span&gt;(&lt;span class=&quot;hljs-keyword&quot;&gt;int&lt;/span&gt; page,&lt;span class=&quot;hljs-keyword&quot;&gt;int&lt;/span&gt; limit,String where,String order) {
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;finding page User instances&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            String queryString = &lt;span class=&quot;hljs-string&quot;&gt;&quot;from User&quot;&lt;/span&gt;;
+            &lt;span class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt;(!(where.equals(&lt;span class=&quot;hljs-string&quot;&gt;&quot;&quot;&lt;/span&gt;) || where.equals(&lt;span class=&quot;hljs-string&quot;&gt;&quot;&apos;&apos;&quot;&lt;/span&gt;)))queryString = queryString+&lt;span class=&quot;hljs-string&quot;&gt;&quot; WHERE &quot;&lt;/span&gt;+where;
+            &lt;span class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt;(!(order.equals(&lt;span class=&quot;hljs-string&quot;&gt;&quot;&quot;&lt;/span&gt;))) queryString=queryString+ &lt;span class=&quot;hljs-string&quot;&gt;&quot; ORDER BY &quot;&lt;/span&gt; +order;
+
+            Query queryObject = getCurrentSession().createQuery(queryString);
+            queryObject.setMaxResults(limit);
+            queryObject.setFirstResult((page-&lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;)*limit);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; queryObject.list();
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;find all failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;count&lt;/span&gt;(String where){
+        log.debug(&lt;span class=&quot;hljs-string&quot;&gt;&quot;counting User instances&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;try&lt;/span&gt; {
+            String queryString = &lt;span class=&quot;hljs-string&quot;&gt;&quot;select count(*) from User table&quot;&lt;/span&gt;;
+            &lt;span class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt;(!where.equals(&lt;span class=&quot;hljs-string&quot;&gt;&quot;&quot;&lt;/span&gt;))queryString = queryString+&lt;span class=&quot;hljs-string&quot;&gt;&quot; WHERE &quot;&lt;/span&gt;+where;
+            Long count = (Long)getCurrentSession().createQuery(queryString).uniqueResult();
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; count.intValue();
+        } &lt;span class=&quot;hljs-keyword&quot;&gt;catch&lt;/span&gt; (RuntimeException re) {
+            log.error(&lt;span class=&quot;hljs-string&quot;&gt;&quot;find all failed&quot;&lt;/span&gt;, re);
+            &lt;span class=&quot;hljs-keyword&quot;&gt;throw&lt;/span&gt; re;
+        }
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; UserDAO &lt;span class=&quot;hljs-title&quot;&gt;getFromApplicationContext&lt;/span&gt;(ApplicationContext ctx) {
+        UserDAO m= (UserDAO) ctx.getBean(&lt;span class=&quot;hljs-string&quot;&gt;&quot;UserDAO&quot;&lt;/span&gt;);
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; m;
+    }
+}`&lt;/pre&gt;
+
+## BaseHibernateDAO
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`
+&lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;BaseHibernateDAO&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;implements&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;IBaseHibernateDAO&lt;/span&gt; {&lt;/span&gt;
+
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Override&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; Session &lt;span class=&quot;hljs-title&quot;&gt;getSession&lt;/span&gt;() {
+        &lt;span class=&quot;hljs-comment&quot;&gt;//return HibernateessFactory.getSession();&lt;/span&gt;
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; secondFactory_second.getCurrentSession();
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; secondFactory secondFactory;
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;setsecondFactory&lt;/span&gt;(secondFactory secondFactory) {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;this&lt;/span&gt;.secondFactory = secondFactory;
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; Session &lt;span class=&quot;hljs-title&quot;&gt;getCurrentSession&lt;/span&gt;() {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; secondFactory.getCurrentSession();
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;protected&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;initDao&lt;/span&gt;() {
+        &lt;span class=&quot;hljs-comment&quot;&gt;// do nothing&lt;/span&gt;
+    }
+
+    &lt;span class=&quot;hljs-javadoc&quot;&gt;/**
+     * 把某个对象变成游离 防止误改属性
+     *&lt;span class=&quot;hljs-javadoctag&quot;&gt; @param&lt;/span&gt; m
+     */&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;evict&lt;/span&gt;(Object m){
+        getSession().evict(m);;
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;flush&lt;/span&gt;(){
+        getSession().flush();
+    }
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;clear&lt;/span&gt;(){
+        getSession().clear();
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;commit&lt;/span&gt;(){
+        getSession().getTransaction().commit();
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;beginTrasaction&lt;/span&gt;(){
+        getSession().beginTransaction();
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;rollback&lt;/span&gt;(){
+        getSession().getTransaction().rollback();
+    }
+}`&lt;/pre&gt;
+
+## HibernateessFactory
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.HibernateException;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.Session;
+&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.secondFactory;
+
+&lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;HibernateSessionFactory&lt;/span&gt; {&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; secondFactory secondFactory;
+
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;HibernateSessionFactory&lt;/span&gt;() {
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; Session &lt;span class=&quot;hljs-title&quot;&gt;getSession&lt;/span&gt;() &lt;span class=&quot;hljs-keyword&quot;&gt;throws&lt;/span&gt; HibernateException {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; sessionFactory_second.getCurrentSession();
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;closeSession&lt;/span&gt;() &lt;span class=&quot;hljs-keyword&quot;&gt;throws&lt;/span&gt; HibernateException {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt; (sessionFactory_second.getCurrentSession() != &lt;span class=&quot;hljs-keyword&quot;&gt;null&lt;/span&gt;) {
+            sessionFactory_second.getCurrentSession().close();
+        }
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; SessionFactory &lt;span class=&quot;hljs-title&quot;&gt;getSessionFactory&lt;/span&gt;() {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; sessionFactory_second;
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;setSessionFactory&lt;/span&gt;(SessionFactory sf){
+        sessionFactory_second = sf;
+    }
+}`&lt;/pre&gt;
+
+## IBaseHibernateDAO
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-keyword&quot;&gt;import&lt;/span&gt; org.hibernate.Session;
+
+&lt;span class=&quot;hljs-javadoc&quot;&gt;/**
+ * Data accsecond interface for domain model
+ *&lt;span class=&quot;hljs-javadoctag&quot;&gt; @author&lt;/span&gt; MyEclipse Persistence Tools
+ */&lt;/span&gt;
+&lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;interface&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;IBaseHibernateDAO&lt;/span&gt; {&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; Session &lt;span class=&quot;hljs-title&quot;&gt;getSession&lt;/span&gt;();
+}`&lt;/pre&gt;
+
+## hbm.xml
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&amp;lt;hibernate-mapping&amp;gt;
+    &amp;lt;&lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;com.cn.hightech.entity.gx.User&quot;&lt;/span&gt; table=&lt;span class=&quot;hljs-string&quot;&gt;&quot;_USER&quot;&lt;/span&gt; schema=&lt;span class=&quot;hljs-string&quot;&gt;&quot;WAS&quot;&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;userUnid&quot;&lt;/span&gt; type=&lt;span class=&quot;hljs-string&quot;&gt;&quot;java.lang.String&quot;&lt;/span&gt;&amp;gt;
+            &amp;lt;column &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;USER_UNID&quot;&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;length&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;32&quot;&lt;/span&gt; /&amp;gt;
+            &amp;lt;generator &lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;assigned&quot;&lt;/span&gt; /&amp;gt;
+        &amp;lt;/&lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;userLoginName&quot;&lt;/span&gt; type=&lt;span class=&quot;hljs-string&quot;&gt;&quot;java.lang.String&quot;&lt;/span&gt;&amp;gt;
+            &amp;lt;column &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;USER_LOGIN_NAME&quot;&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;length&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;100&quot;&lt;/span&gt; /&amp;gt;
+        &amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+    &amp;lt;/&lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;&amp;gt;
+&amp;lt;/hibernate-mapping&amp;gt;
+`&lt;/pre&gt;
+
+## applicationContext.xml
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&amp;lt;!&lt;span class=&quot;hljs-comment&quot;&gt;-- gx --&amp;gt;&lt;/span&gt;
+    &amp;lt;bean &lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;dataSource_second&quot;&lt;/span&gt; &lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;com.mchange.v2.c3p0.ComboPooledDataSource&quot;&lt;/span&gt; destroy-method=&lt;span class=&quot;hljs-string&quot;&gt;&quot;close&quot;&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;driverClass&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;oracle.jdbc.OracleDriver&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;jdbcUrl&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;jdbc:oracle:thin:@112.29.170.10:1521:gx&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;user&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;gx&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;password&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;feFG33$$523&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;maxIdleTime&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;60&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;  
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;maxPoolSize&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;20&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;  
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;minPoolSize&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;10&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;acquireRetryDelay&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;1000&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;  
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;acquireRetryAttempts&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;60&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;  
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;breakAfterAcquireFailure&quot;&lt;/span&gt; value=&lt;span class=&quot;hljs-string&quot;&gt;&quot;false&quot;&lt;/span&gt;&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt; 
+    &amp;lt;/bean&amp;gt;
+    &amp;lt;bean &lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;secondFactory_second&quot;&lt;/span&gt; &lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;org.springframework.orm.hibernate4.LocalsecondFactoryBean&quot;&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;dataSource&quot;&lt;/span&gt;&amp;gt;&amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;ref&lt;/span&gt; bean=&lt;span class=&quot;hljs-string&quot;&gt;&quot;dataSource_second&quot;&lt;/span&gt; /&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;hibernateProperties&quot;&lt;/span&gt;&amp;gt;
+            &amp;lt;props&amp;gt;
+                &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt; key=&lt;span class=&quot;hljs-string&quot;&gt;&quot;hibernate.dialect&quot;&lt;/span&gt;&amp;gt;org.hibernate.dialect.Oracle9Dialect&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt;&amp;gt;
+                &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt; key=&lt;span class=&quot;hljs-string&quot;&gt;&quot;current_Session_context_class&quot;&lt;/span&gt;&amp;gt;thread&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt;&amp;gt;
+                &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt; key=&lt;span class=&quot;hljs-string&quot;&gt;&quot;hibernate.show_sql&quot;&lt;/span&gt;&amp;gt;&lt;span class=&quot;hljs-constant&quot;&gt;true&lt;/span&gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt;&amp;gt;
+                &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt; key=&lt;span class=&quot;hljs-string&quot;&gt;&quot;hibernate.jdbc.fetch_size&quot;&lt;/span&gt;&amp;gt;&lt;span class=&quot;hljs-number&quot;&gt;50&lt;/span&gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt;&amp;gt;
+                &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt; key=&lt;span class=&quot;hljs-string&quot;&gt;&quot;hibernate.jdbc.batch_size&quot;&lt;/span&gt;&amp;gt;&lt;span class=&quot;hljs-number&quot;&gt;30&lt;/span&gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt;&amp;gt;
+                &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt; key=&lt;span class=&quot;hljs-string&quot;&gt;&quot;javax.persistence.validation.mode&quot;&lt;/span&gt;&amp;gt;none&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;prop&lt;/span&gt;&amp;gt;
+            &amp;lt;/props&amp;gt;
+        &amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;mappingResources&quot;&lt;/span&gt;&amp;gt;
+            &amp;lt;&lt;span class=&quot;hljs-type&quot;&gt;list&lt;/span&gt;&amp;gt;
+                &amp;lt;value&amp;gt;com/cn/hightech/entity/gx/Dept.hbm.xml&amp;lt;/value&amp;gt;
+                &amp;lt;value&amp;gt;com/cn/hightech/entity/gx/User.hbm.xml&amp;lt;/value&amp;gt;
+            &amp;lt;/&lt;span class=&quot;hljs-type&quot;&gt;list&lt;/span&gt;&amp;gt;
+        &amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+    &amp;lt;/bean&amp;gt;
+    &amp;lt;bean &lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;hibernatesecondFactory_second&quot;&lt;/span&gt; &lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;com.cn.hightech.hb.HibernatesecondFactory&quot;&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;secondFactory&quot;&lt;/span&gt;&amp;gt;&amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;ref&lt;/span&gt; bean=&lt;span class=&quot;hljs-string&quot;&gt;&quot;secondFactory_second&quot;&lt;/span&gt; /&amp;gt;&amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+    &amp;lt;/bean&amp;gt;
+    &amp;lt;bean &lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;transactionManager_second&quot;&lt;/span&gt; &lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;org.springframework.orm.hibernate4.HibernateTransactionManager&quot;&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;secondFactory&quot;&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;ref&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;secondFactory_second&quot;&lt;/span&gt; /&amp;gt;
+    &amp;lt;/bean&amp;gt;
+
+    &amp;lt;tx:annotation-driven &lt;span class=&quot;hljs-keyword&quot;&gt;transaction&lt;/span&gt;-manager=&lt;span class=&quot;hljs-string&quot;&gt;&quot;transactionManager_second&quot;&lt;/span&gt;  proxy-target-&lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;true&quot;&lt;/span&gt;/&amp;gt;
+    &amp;lt;bean &lt;span class=&quot;hljs-property&quot;&gt;id&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;UserDAO&quot;&lt;/span&gt; &lt;span class=&quot;hljs-type&quot;&gt;class&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;com.cn.hightech.entity.gx.UserDAO&quot;&lt;/span&gt;&amp;gt;
+        &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt; &lt;span class=&quot;hljs-property&quot;&gt;name&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;&quot;secondFactory&quot;&lt;/span&gt;&amp;gt;
+            &amp;lt;&lt;span class=&quot;hljs-keyword&quot;&gt;ref&lt;/span&gt; bean=&lt;span class=&quot;hljs-string&quot;&gt;&quot;sessionFactory_second&quot;&lt;/span&gt; /&amp;gt;
+        &amp;lt;/&lt;span class=&quot;hljs-keyword&quot;&gt;property&lt;/span&gt;&amp;gt;
+    &amp;lt;/bean&amp;gt;`&lt;/pre&gt;
+
+## controller
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-javadoc&quot;&gt;/**
+* 下面@Transactional 和&lt;span class=&quot;hljs-javadoctag&quot;&gt; @Service&lt;/span&gt;&lt;span class=&quot;hljs-javadoctag&quot;&gt; @Provider&lt;/span&gt;注解都需要
+**/&lt;/span&gt;
+&lt;span class=&quot;hljs-annotation&quot;&gt;@Service&lt;/span&gt;
+&lt;span class=&quot;hljs-annotation&quot;&gt;@Provider&lt;/span&gt;
+&lt;span class=&quot;hljs-annotation&quot;&gt;@Path&lt;/span&gt;(&lt;span class=&quot;hljs-string&quot;&gt;&quot;/User/&quot;&lt;/span&gt;)
+&lt;span class=&quot;hljs-annotation&quot;&gt;@Transactional&lt;/span&gt;(&lt;span class=&quot;hljs-string&quot;&gt;&quot;transactionManager_second&quot;&lt;/span&gt;)
+&lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-class&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;UserController&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;extends&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;BaseController&lt;/span&gt;{&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;static&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;final&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;long&lt;/span&gt; serialVersionUID = &lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;L;
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Context&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; HttpServletRequest request;
+
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Context&lt;/span&gt;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;private&lt;/span&gt; ApplicationContext ctx;
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;UserController&lt;/span&gt;(){
+    }
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;UserController&lt;/span&gt;(HttpServletRequest request1){
+        request=request1;
+    }
+
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Transactional&lt;/span&gt;(&lt;span class=&quot;hljs-string&quot;&gt;&quot;transactionManager_second&quot;&lt;/span&gt;)
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@GET&lt;/span&gt;
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Path&lt;/span&gt;(&lt;span class=&quot;hljs-string&quot;&gt;&quot;/Query/&quot;&lt;/span&gt;)
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Produces&lt;/span&gt;({MediaType.APPLICATION_JSON})
+    &lt;span class=&quot;hljs-annotation&quot;&gt;@Consumes&lt;/span&gt;({MediaType.APPLICATION_JSON})
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; User &lt;span class=&quot;hljs-title&quot;&gt;Query&lt;/span&gt;(@&lt;span class=&quot;hljs-title&quot;&gt;QueryParam&lt;/span&gt;(&quot;USER_UNID&quot;) String USER_UNID) &lt;span class=&quot;hljs-keyword&quot;&gt;throws&lt;/span&gt; IOException{
+        &lt;span class=&quot;hljs-comment&quot;&gt;//登陆验证&lt;/span&gt;
+        User loginUser=QueryFromCache();
+        &lt;span class=&quot;hljs-keyword&quot;&gt;if&lt;/span&gt;(loginUser==&lt;span class=&quot;hljs-keyword&quot;&gt;null&lt;/span&gt;)&lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;null&lt;/span&gt;;
+        &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; UserDAO.getFromApplicationContext(ctx).findById(USER_UNID);
+    }
+}
+
+        &lt;div&gt;
+            作者：xundh 发表于2017/4/15 15:38:55 [原文链接](http://blog.csdn.net/xundh/article/details/69239019)
+        &lt;/div&gt;
+        &lt;div&gt;
+        阅读：82 评论：0 [查看评论](http://blog.csdn.net/xundh/article/details/69239019#comments)
+        &lt;/div&gt;
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://xiexiexin.github.io/2017/04/15/原-Hibernate学习记录3-Hibernate-配置多数据源/" data-id="cj2d8br0y000870m4d2f2v1y7" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-原-运维基础——Zabbix入门" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/15/原-运维基础——Zabbix入门/" class="article-date">
+  <time datetime="2017-04-15T07:34:55.000Z" itemprop="datePublished">2017-04-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/04/15/原-运维基础——Zabbix入门/">[原]运维基础——Zabbix入门</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><em>zabbix是一个基于web界面的、提供分布式系统监视及网络监视功能的企业级开源解决方案</em></p>
+<p>zabbix 由2部分组成： </p>
+<ul>
+<li><p>zabbix server </p>
+</li>
+<li><p>zabbix agent</p>
+</li>
+</ul>
+<p>zabbix server可以通过SNMP、zabbix agent、ping、端口监视等方法提供对远程服务器/网络状态的监视，数据收集等功能，它可以运行在多个操作系统上。</p>
+<h2 id="试验环境"><a href="#试验环境" class="headerlink" title="试验环境"></a>试验环境</h2><p>centos 7</p>
+<h2 id="安装（编译安装方式）"><a href="#安装（编译安装方式）" class="headerlink" title="安装（编译安装方式）"></a>安装（编译安装方式）</h2><h4 id="LAMP环境"><a href="#LAMP环境" class="headerlink" title="LAMP环境"></a>LAMP环境</h4><pre><code>yum install php php&lt;span class=&quot;hljs-attribute&quot;&gt;-gd&lt;/span&gt; php&lt;span class=&quot;hljs-attribute&quot;&gt;-mysql&lt;/span&gt; php&lt;span class=&quot;hljs-attribute&quot;&gt;-bcmath&lt;/span&gt; php&lt;span class=&quot;hljs-attribute&quot;&gt;-mbstring&lt;/span&gt; php&lt;span class=&quot;hljs-attribute&quot;&gt;-xml&lt;/span&gt; curl curl&lt;span class=&quot;hljs-attribute&quot;&gt;-devel&lt;/span&gt; net&lt;span class=&quot;hljs-attribute&quot;&gt;-snmp&lt;/span&gt;   net&lt;span class=&quot;hljs-attribute&quot;&gt;-snmp&lt;/span&gt;&lt;span class=&quot;hljs-attribute&quot;&gt;-devel&lt;/span&gt; perl&lt;span class=&quot;hljs-attribute&quot;&gt;-DBI&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;-y&lt;/span&gt;
+yum install httpd mariadb&lt;span class=&quot;hljs-subst&quot;&gt;*&lt;/span&gt;
+yum install &lt;span class=&quot;hljs-attribute&quot;&gt;-y&lt;/span&gt; php&lt;span class=&quot;hljs-attribute&quot;&gt;-mysql&lt;/span&gt;&lt;span class=&quot;hljs-built_in&quot;&gt;.&lt;/span&gt;x86_64  
+`&lt;/pre&gt;
+
+_zabbix需要php-mysql.x86_64，否则会出现php databases support off_
+
+### 数据库配置
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`systemctl start mariadb&lt;span class=&quot;hljs-built_in&quot;&gt;.&lt;/span&gt;service
+mysql &lt;span class=&quot;hljs-attribute&quot;&gt;-u&lt;/span&gt; root &lt;span class=&quot;hljs-attribute&quot;&gt;-p&lt;/span&gt;
+ &lt;span class=&quot;hljs-subst&quot;&gt;&amp;gt;&lt;/span&gt; create database zabbix character &lt;span class=&quot;hljs-built_in&quot;&gt;set&lt;/span&gt; utf8;
+ &lt;span class=&quot;hljs-subst&quot;&gt;&amp;gt;&lt;/span&gt; insert &lt;span class=&quot;hljs-keyword&quot;&gt;into&lt;/span&gt; mysql&lt;span class=&quot;hljs-built_in&quot;&gt;.&lt;/span&gt;user(Host,User,Password)values(&lt;span class=&quot;hljs-string&quot;&gt;&apos;localhost&apos;&lt;/span&gt;,&lt;span class=&quot;hljs-string&quot;&gt;&apos;zabbix&apos;&lt;/span&gt;,password(&lt;span class=&quot;hljs-string&quot;&gt;&apos;zabbix&apos;&lt;/span&gt;));
+ &lt;span class=&quot;hljs-subst&quot;&gt;&amp;gt;&lt;/span&gt; flush privileges;
+ &lt;span class=&quot;hljs-subst&quot;&gt;&amp;gt;&lt;/span&gt; grant &lt;span class=&quot;hljs-literal&quot;&gt;all&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;on&lt;/span&gt; zabbix&lt;span class=&quot;hljs-built_in&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;hljs-subst&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;hljs-string&quot;&gt;&apos;zabbix&apos;&lt;/span&gt;@&lt;span class=&quot;hljs-string&quot;&gt;&apos;127.0.0.1&apos;&lt;/span&gt; identified &lt;span class=&quot;hljs-keyword&quot;&gt;by&lt;/span&gt; &lt;span class=&quot;hljs-string&quot;&gt;&apos;zabbix&apos;&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;with&lt;/span&gt; grant option;
+ &lt;span class=&quot;hljs-subst&quot;&gt;&amp;gt;&lt;/span&gt; flush privileges;
+ &lt;span class=&quot;hljs-subst&quot;&gt;&amp;gt;&lt;/span&gt; quit;`&lt;/pre&gt;
+
+### 安装zabbix
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`wget http:&lt;span class=&quot;hljs-comment&quot;&gt;//nchc.dl.sourceforge.net/project/zabbix/ZABBIX%20Latest%20Stable/2.4.5/zabbix-2.4.5.tar.gz&lt;/span&gt;
+tar &lt;span class=&quot;hljs-attribute&quot;&gt;-zxvf&lt;/span&gt; zabbix&lt;span class=&quot;hljs-subst&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;2.4&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.5&lt;/span&gt;&lt;span class=&quot;hljs-built_in&quot;&gt;.&lt;/span&gt;tar&lt;span class=&quot;hljs-built_in&quot;&gt;.&lt;/span&gt;gz
+cd zabbix&lt;span class=&quot;hljs-subst&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;2.4&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.5&lt;/span&gt;
+&lt;span class=&quot;hljs-built_in&quot;&gt;.&lt;/span&gt;/configure &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;with&lt;/span&gt;&lt;span class=&quot;hljs-attribute&quot;&gt;-mysql&lt;/span&gt;&lt;span class=&quot;hljs-subst&quot;&gt;=&lt;/span&gt;/usr/bin/mysql_config &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;with&lt;/span&gt;&lt;span class=&quot;hljs-attribute&quot;&gt;-net&lt;/span&gt;&lt;span class=&quot;hljs-attribute&quot;&gt;-snmp&lt;/span&gt; &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;with&lt;/span&gt;&lt;span class=&quot;hljs-attribute&quot;&gt;-libcurl&lt;/span&gt; &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;enable&lt;span class=&quot;hljs-attribute&quot;&gt;-server&lt;/span&gt; &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;enable&lt;span class=&quot;hljs-attribute&quot;&gt;-agent&lt;/span&gt; &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;enable&lt;span class=&quot;hljs-attribute&quot;&gt;-proxy&lt;/span&gt; &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;prefix&lt;span class=&quot;hljs-subst&quot;&gt;=&lt;/span&gt;/usr/&lt;span class=&quot;hljs-built_in&quot;&gt;local&lt;/span&gt;/zabbix
+参数说明：
+    &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;prefix&lt;span class=&quot;hljs-subst&quot;&gt;----&amp;gt;&lt;/span&gt; 指定zabbix安装目录
+    &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;enable&lt;span class=&quot;hljs-attribute&quot;&gt;-server&lt;/span&gt;&lt;span class=&quot;hljs-subst&quot;&gt;----&amp;gt;&lt;/span&gt; 支持zabbix服务器
+    &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;enable&lt;span class=&quot;hljs-attribute&quot;&gt;-agent&lt;/span&gt;&lt;span class=&quot;hljs-subst&quot;&gt;----&amp;gt;&lt;/span&gt; 支持zabbix代理
+    &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;enable&lt;span class=&quot;hljs-attribute&quot;&gt;-proxy&lt;/span&gt;&lt;span class=&quot;hljs-subst&quot;&gt;----&amp;gt;&lt;/span&gt; 支持zabbix代理服务器
+    &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;with&lt;/span&gt;&lt;span class=&quot;hljs-attribute&quot;&gt;-libcurl&lt;/span&gt;&lt;span class=&quot;hljs-subst&quot;&gt;----&amp;gt;&lt;/span&gt; 使用curl包
+    &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;with&lt;/span&gt;&lt;span class=&quot;hljs-attribute&quot;&gt;-net&lt;/span&gt;&lt;span class=&quot;hljs-attribute&quot;&gt;-snmp&lt;/span&gt;&lt;span class=&quot;hljs-subst&quot;&gt;----&amp;gt;&lt;/span&gt; 使用net&lt;span class=&quot;hljs-attribute&quot;&gt;-snmp&lt;/span&gt;软件包,选择性地指定路径NET&lt;span class=&quot;hljs-attribute&quot;&gt;-SNMP&lt;/span&gt;配置
+    &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;with&lt;/span&gt;&lt;span class=&quot;hljs-attribute&quot;&gt;-mysql&lt;/span&gt;&lt;span class=&quot;hljs-subst&quot;&gt;=&lt;/span&gt;/usr/bin/mysql_config 使用MySQL客户端库可以选择指定路径mysql_config
+make
+make install`&lt;/pre&gt;
+
+_注：如出现configure: error: MySQL library not found错误，是因为缺少mariadb-devel该软件包，解决方法是：_
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`yum &lt;span class=&quot;hljs-keyword&quot;&gt;install&lt;/span&gt; mariadb-devel`&lt;/pre&gt;
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`mysql -u root -p
+  MariaDB [(none)]&amp;gt; use zabbix;
+  MariaDB [zabbix]&amp;gt; &lt;span class=&quot;hljs-keyword&quot;&gt;source&lt;/span&gt; /root/zabbix-&lt;span class=&quot;hljs-number&quot;&gt;2.4&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.5&lt;/span&gt;/database/mysql/schema.sql
+  MariaDB [zabbix]&amp;gt; &lt;span class=&quot;hljs-keyword&quot;&gt;source&lt;/span&gt; /root/zabbix-&lt;span class=&quot;hljs-number&quot;&gt;2.4&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.5&lt;/span&gt;/database/mysql/data.sql
+  MariaDB [zabbix]&amp;gt; &lt;span class=&quot;hljs-keyword&quot;&gt;source&lt;/span&gt; /root/zabbix-&lt;span class=&quot;hljs-number&quot;&gt;2.4&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.5&lt;/span&gt;/database/mysql/images.sql
+  MariaDB [zabbix]&amp;gt; &lt;span class=&quot;hljs-keyword&quot;&gt;quit&lt;/span&gt;`&lt;/pre&gt;
+
+### 端口设置（可选）
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`cat /etc/services |grep zabbix
+zabbix-agent    &lt;span class=&quot;hljs-number&quot;&gt;10050&lt;/span&gt;/tcp               &lt;span class=&quot;hljs-array&quot;&gt;# Zabbix Agent      &lt;/span&gt;&lt;span class=&quot;hljs-comment&quot;&gt;//客户端&lt;/span&gt;
+zabbix-agent    &lt;span class=&quot;hljs-number&quot;&gt;10050&lt;/span&gt;/udp               &lt;span class=&quot;hljs-array&quot;&gt;# Zabbix Agent&lt;/span&gt;
+zabbix-trapper  &lt;span class=&quot;hljs-number&quot;&gt;10051&lt;/span&gt;/tcp               &lt;span class=&quot;hljs-array&quot;&gt;# Zabbix Trapper    &lt;/span&gt;&lt;span class=&quot;hljs-comment&quot;&gt;//服务端&lt;/span&gt;
+zabbix-trapper  &lt;span class=&quot;hljs-number&quot;&gt;10051&lt;/span&gt;/udp               &lt;span class=&quot;hljs-array&quot;&gt;# Zabbix Trapper&lt;/span&gt;`&lt;/pre&gt;
+
+### 配置文件
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`mkdir -p /etc/zabbix
+cp -r &lt;span class=&quot;hljs-regexp&quot;&gt;/root/zabbix-2.4.5/conf/&lt;/span&gt;* &lt;span class=&quot;hljs-regexp&quot;&gt;/etc/zabbix/&lt;/span&gt;
+chown -R &lt;span class=&quot;hljs-attribute&quot;&gt;zabbix&lt;/span&gt;:zabbix /etc/zabbix
+ln -s &lt;span class=&quot;hljs-regexp&quot;&gt;/usr/local/zabbix/etc /etc/zabbix/&lt;/span&gt;
+ln -s &lt;span class=&quot;hljs-regexp&quot;&gt;/usr/local/zabbix/bin/&lt;/span&gt;* &lt;span class=&quot;hljs-regexp&quot;&gt;/usr/bin/&lt;/span&gt;
+ln -s &lt;span class=&quot;hljs-regexp&quot;&gt;/usr/local/zabbix/sbin/&lt;/span&gt;* &lt;span class=&quot;hljs-regexp&quot;&gt;/usr/sbin/&lt;/span&gt;
+vi /etc/zabbix/zabbix_server.conf`&lt;/pre&gt;
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-number&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:LogFile=/tmp/zabbix_server&lt;/span&gt;.log   &lt;span class=&quot;hljs-comment&quot;&gt;##日志文件地址&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;68&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:DBHost=localhost&lt;/span&gt;                  &lt;span class=&quot;hljs-comment&quot;&gt;##数据库主机&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;78&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:DBName=zabbix&lt;/span&gt;                     &lt;span class=&quot;hljs-comment&quot;&gt;##数据库名&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;94&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:DBUser=zabbix&lt;/span&gt;                     &lt;span class=&quot;hljs-comment&quot;&gt;##数据库用户名&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;102&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:DBPassword=zabbix&lt;/span&gt;                  &lt;span class=&quot;hljs-comment&quot;&gt;##数据库密码&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;282&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:ListenIP=&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;127.0&lt;/span&gt;.&lt;span class=&quot;hljs-number&quot;&gt;0&lt;/span&gt;.&lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;              &lt;span class=&quot;hljs-comment&quot;&gt;##数据库IP地址&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;425&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:AlertScriptsPath=/usr/local/zabbix/share/zabbix/alertscripts&lt;/span&gt;&lt;span class=&quot;hljs-comment&quot;&gt;##zabbix&lt;/span&gt;
+运行脚本存放目录`&lt;/pre&gt;
+
+查看修改一的结果
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`cat /etc/zabbix/zabbix_server.conf | &lt;span class=&quot;hljs-keyword&quot;&gt;grep&lt;/span&gt; -n ^[^&lt;span class=&quot;hljs-comment&quot;&gt;#]&lt;/span&gt;
+`&lt;/pre&gt;
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`vi /etc/zabbix/zabbix_agentd&lt;span class=&quot;hljs-preprocessor&quot;&gt;.conf&lt;/span&gt;`&lt;/pre&gt;
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-number&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:PidFile=/tmp/zabbix_agentd&lt;/span&gt;.pid           &lt;span class=&quot;hljs-comment&quot;&gt;##进程PID&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;21&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:LogFile=/tmp/zabbix_agentd&lt;/span&gt;.log           &lt;span class=&quot;hljs-comment&quot;&gt;##日志保存位置&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;59&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:EnableRemoteCommands=&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;                   &lt;span class=&quot;hljs-comment&quot;&gt;##允许执行远程命令&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;81&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:Server=&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;127.0&lt;/span&gt;.&lt;span class=&quot;hljs-number&quot;&gt;0&lt;/span&gt;.&lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;                         &lt;span class=&quot;hljs-comment&quot;&gt;##agent端的ip&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;122&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:ServerActive=&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;127.0&lt;/span&gt;.&lt;span class=&quot;hljs-number&quot;&gt;0&lt;/span&gt;.&lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;133&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:Hostname=Zabbix&lt;/span&gt; server                  &lt;span class=&quot;hljs-comment&quot;&gt;##必须与zabbix创建的hostname相同&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;252&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:Include=/usr/local/etc/zabbix_agentd&lt;/span&gt;.conf.d/
+&lt;span class=&quot;hljs-number&quot;&gt;265&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:UnsafeUserParameters=&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;                  &lt;span class=&quot;hljs-comment&quot;&gt;##启动自定义key&lt;/span&gt;`&lt;/pre&gt;
+
+### 配置php.ini
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`vi /etc/php&lt;span class=&quot;hljs-preprocessor&quot;&gt;.ini&lt;/span&gt;`&lt;/pre&gt;
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-number&quot;&gt;384&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:max_execution_time&lt;/span&gt; = &lt;span class=&quot;hljs-number&quot;&gt;300&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;394&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:max_input_time&lt;/span&gt; = &lt;span class=&quot;hljs-number&quot;&gt;300&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;405&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:memory_limit&lt;/span&gt; = &lt;span class=&quot;hljs-number&quot;&gt;128&lt;/span&gt;M
+&lt;span class=&quot;hljs-number&quot;&gt;800&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:upload_max_filesize&lt;/span&gt; = &lt;span class=&quot;hljs-number&quot;&gt;2&lt;/span&gt;M
+&lt;span class=&quot;hljs-number&quot;&gt;878&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:date&lt;/span&gt;.timezone = &lt;span class=&quot;hljs-constant&quot;&gt;Asia&lt;/span&gt;/&lt;span class=&quot;hljs-constant&quot;&gt;Shanghai&lt;/span&gt;
+&lt;span class=&quot;hljs-number&quot;&gt;672&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:post_max_size&lt;/span&gt; = &lt;span class=&quot;hljs-number&quot;&gt;28&lt;/span&gt;M`&lt;/pre&gt;
+
+### 配置 web
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`cd /root/zabbix-&lt;span class=&quot;hljs-number&quot;&gt;2.4&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.5&lt;/span&gt;
+&lt;span class=&quot;hljs-keyword&quot;&gt;cp&lt;/span&gt; -r frontends/php /var/www/html/zabbix
+vi /etc/httpd/conf/httpd&lt;span class=&quot;hljs-preprocessor&quot;&gt;.conf&lt;/span&gt;`&lt;/pre&gt;
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-number&quot;&gt;163&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:&amp;lt;IfModule&lt;/span&gt; dir_module&amp;gt;
+&lt;span class=&quot;hljs-number&quot;&gt;164&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;hljs-constant&quot;&gt;DirectoryIndex&lt;/span&gt; index.html index.php
+&lt;span class=&quot;hljs-number&quot;&gt;165&lt;/span&gt;&lt;span class=&quot;hljs-symbol&quot;&gt;:&amp;lt;/IfModule&amp;gt;&lt;/span&gt;`&lt;/pre&gt;
+
+### 关闭SELinux
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`setenforce &lt;span class=&quot;hljs-number&quot;&gt;0&lt;/span&gt;                       &lt;span class=&quot;hljs-comment&quot;&gt;##设置SELinux 成为permissive模式  （关闭SELinux）&lt;/span&gt;
+setenforce &lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;                       &lt;span class=&quot;hljs-comment&quot;&gt;##设置SELinux 成为enforcing模式     （开启SELinux）&lt;/span&gt;`&lt;/pre&gt;
+
+或
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-attribute&quot;&gt;vi /etc/selinux/config 
+将SELINUX&lt;/span&gt;=&lt;span class=&quot;hljs-string&quot;&gt;enforcing 改为SELINUX=disabled
+需重启机器&lt;/span&gt;`&lt;/pre&gt;
+
+### 防火墙
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`/sbin/iptables &lt;span class=&quot;hljs-attribute&quot;&gt;-I&lt;/span&gt; INPUT &lt;span class=&quot;hljs-attribute&quot;&gt;-p&lt;/span&gt; tcp &lt;span class=&quot;hljs-subst&quot;&gt;--&lt;/span&gt;dport &lt;span class=&quot;hljs-number&quot;&gt;80&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;-j&lt;/span&gt; ACCEPT   写入修改`&lt;/pre&gt;
+
+### 安装 web
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`systemctl &lt;span class=&quot;hljs-operator&quot;&gt;&lt;span class=&quot;hljs-keyword&quot;&gt;start&lt;/span&gt; httpd.service&lt;/span&gt;`&lt;/pre&gt;
+
+浏览： 
+
+[http://ip/zabbix/setup.php](http://ip/zabbix/setup.php) 
+
+![这里写图片描述](http://img.blog.csdn.net/20170414134601288?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast) 
+
+按提示操作操作。 
+
+当提示： 
+
+![这里写图片描述](http://img.blog.csdn.net/20170427095903696?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast) 
+
+点击Download configuration file，放到指定的位置: 
+
+/var/www/html/zabbix/conf/zabbix.conf.php 
+
+点Retry。
+
+安装完后，默认账号admin，密码zabbix。
+
+### 添加开机启动脚本
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`cd zabbix-&lt;span class=&quot;hljs-number&quot;&gt;2.4&lt;/span&gt;&lt;span class=&quot;hljs-number&quot;&gt;.5&lt;/span&gt;/
+&lt;span class=&quot;hljs-keyword&quot;&gt;cp&lt;/span&gt; misc/init&lt;span class=&quot;hljs-preprocessor&quot;&gt;.d&lt;/span&gt;/fedora/core5/zabbix_server /etc/rc&lt;span class=&quot;hljs-preprocessor&quot;&gt;.d&lt;/span&gt;/init&lt;span class=&quot;hljs-preprocessor&quot;&gt;.d&lt;/span&gt;/zabbix_server
+&lt;span class=&quot;hljs-keyword&quot;&gt;cp&lt;/span&gt; misc/init&lt;span class=&quot;hljs-preprocessor&quot;&gt;.d&lt;/span&gt;/fedora/core5/zabbix_server /etc/rc&lt;span class=&quot;hljs-preprocessor&quot;&gt;.d&lt;/span&gt;/init&lt;span class=&quot;hljs-preprocessor&quot;&gt;.d&lt;/span&gt;/zabbix_agentd
+chmod u+&lt;span class=&quot;hljs-built_in&quot;&gt;x&lt;/span&gt; /etc/rc&lt;span class=&quot;hljs-preprocessor&quot;&gt;.d&lt;/span&gt;/init&lt;span class=&quot;hljs-preprocessor&quot;&gt;.d&lt;/span&gt;/zabbix_server
+chmod u+&lt;span class=&quot;hljs-built_in&quot;&gt;x&lt;/span&gt; /etc/rc&lt;span class=&quot;hljs-preprocessor&quot;&gt;.d&lt;/span&gt;/init&lt;span class=&quot;hljs-preprocessor&quot;&gt;.d&lt;/span&gt;/zabbix_agentd
+chkconfig zabbix_server on 
+chkconfig zabbix_agentd on`&lt;/pre&gt;
+
+**添加zabbix用户**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`groupadd &lt;span class=&quot;hljs-attribute&quot;&gt;-g&lt;/span&gt; &lt;span class=&quot;hljs-number&quot;&gt;130&lt;/span&gt; zabbix
+useradd &lt;span class=&quot;hljs-attribute&quot;&gt;-u&lt;/span&gt; &lt;span class=&quot;hljs-number&quot;&gt;130&lt;/span&gt; &lt;span class=&quot;hljs-attribute&quot;&gt;-g&lt;/span&gt; zabbix &lt;span class=&quot;hljs-attribute&quot;&gt;-c&lt;/span&gt; &lt;span class=&quot;hljs-string&quot;&gt;&apos;Zabbix monitoring&apos;&lt;/span&gt; zabbix`&lt;/pre&gt;
+
+**启动zabbix server**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`/usr/&lt;span class=&quot;hljs-keyword&quot;&gt;local&lt;/span&gt;/zabbix/sbin/zabbix_server start
+
+        &lt;div&gt;
+            作者：xundh 发表于2017/4/15 15:34:55 [原文链接](http://blog.csdn.net/xundh/article/details/70171032)
+        &lt;/div&gt;
+        &lt;div&gt;
+        阅读：83 评论：0 [查看评论](http://blog.csdn.net/xundh/article/details/70171032#comments)
+        &lt;/div&gt;
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://xiexiexin.github.io/2017/04/15/原-运维基础——Zabbix入门/" data-id="cj2d8br2f000j70m4q8uy4c1s" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+
+  <nav id="page-nav">
+    <a class="extend prev" rel="prev" href="/page/2/">&laquo; __('prev')</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span>
+  </nav>
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">五月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/06/First-Article/">First Article</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/06/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/03/原-Hadoop-学习笔记十-HA高可用设置/">[原]Hadoop 学习笔记十 HA高可用设置</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/03/原-Hadoop-学习笔记九-任务远程提交-Java远程提交/">[原]Hadoop 学习笔记九 任务远程提交--Java远程提交</a>
+          </li>
+        
+          <li>
+            <a href="/2017/05/02/原-Hadoop-学习笔记八-任务远程提交-Eclipse插件/">[原]Hadoop 学习笔记八 任务远程提交--Eclipse插件</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 谢厂节(Cade)<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
