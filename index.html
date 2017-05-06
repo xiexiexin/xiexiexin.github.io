@@ -65,42 +65,6 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-First-Article" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/05/06/First-Article/" class="article-date">
-  <time datetime="2017-05-06T12:04:04.000Z" itemprop="datePublished">2017-05-06</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/06/First-Article/">First Article</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="https://xiexiexin.github.io/2017/05/06/First-Article/" data-id="cj2d8n61r00004cm4wv9ungg3" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
     <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/05/06/hello-world/" class="article-date">
@@ -1265,6 +1229,149 @@ Settings参数列表：
 
 
   
+    <article id="post-原-ASP-NET-MVC框架入门" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/25/原-ASP-NET-MVC框架入门/" class="article-date">
+  <time datetime="2017-04-25T13:55:51.000Z" itemprop="datePublished">2017-04-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/04/25/原-ASP-NET-MVC框架入门/">[原]ASP.NET MVC框架入门</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>ASP.NET MVC[1]  是微软官方提供的以MVC模式为基础的ASP.NET Web应用程序(Web Application)框架,它由Castle的MonoRail而来。</p>
+<p>MVC 是一种使用 MVC（Model View Controller 模型-视图-控制器）设计创建 Web 应用程序的模式。 </p>
+<p>Model（模型）表示应用程序核心（比如数据库记录列表）。 </p>
+<p>View（视图）显示数据（数据库记录）。 </p>
+<p>Controller（控制器）处理输入（写入数据库记录）。</p>
+<p>ASP.NET MVC 4内置于Visual Studio 2012，新增了手机模版、单页应用程序，Web API等模版，更新了一些 javascript 库，其中示例页面也使用了jquery的AJAX登录，并增加了OAuth认证/Entity Framework5的支持。同时也增强了对HTML5、AsyncController等的支持。</p>
+<h2 id="关键技术"><a href="#关键技术" class="headerlink" title="关键技术"></a>关键技术</h2><ul>
+<li>ActionResult ： Action的返回类型</li>
+<li>Filter：过滤顺</li>
+<li>ModelBinder：Model绑定顺</li>
+<li>Url Routing：Url路由规则</li>
+<li>视图引擎：ASP.NET MVC包含多种视图引擎</li>
+</ul>
+<h2 id="建立ASP-NET-MVC项目"><a href="#建立ASP-NET-MVC项目" class="headerlink" title="建立ASP.NET MVC项目"></a>建立ASP.NET MVC项目</h2><p><img src="http://img.blog.csdn.net/20170425211637455?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p><img src="http://img.blog.csdn.net/20170425211903943?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p><strong>F5 运行</strong> </p>
+<p><img src="http://img.blog.csdn.net/20170425214259596?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p><strong>项目结构</strong> </p>
+<p><img src="http://img.blog.csdn.net/20170425214417268?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<h3 id="控制器-Controller"><a href="#控制器-Controller" class="headerlink" title="控制器 Controller"></a>控制器 Controller</h3><p><strong>新建Controller</strong> </p>
+<p><img src="http://img.blog.csdn.net/20170425221702880?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" alt="这里写图片描述"></p>
+<p>修改代码：</p>
+<pre><code>&lt;span class=&quot;hljs-keyword&quot;&gt;using&lt;/span&gt; System.Web.Mvc;
+
+namespace MvcApplication1.Controllers
+{
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; TestController : Controller
+    {
+        &lt;span class=&quot;hljs-comment&quot;&gt;//&lt;/span&gt;
+        &lt;span class=&quot;hljs-comment&quot;&gt;// GET: /Test/&lt;/span&gt;
+
+        &lt;span class=&quot;hljs-comment&quot;&gt;//public ActionResult Index()&lt;/span&gt;
+        &lt;span class=&quot;hljs-comment&quot;&gt;//{&lt;/span&gt;
+        &lt;span class=&quot;hljs-comment&quot;&gt;//    return View();&lt;/span&gt;
+        &lt;span class=&quot;hljs-comment&quot;&gt;//}&lt;/span&gt;
+        &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;Index&lt;/span&gt;()
+        {
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;hljs-string&quot;&gt;&quot;index&quot;&lt;/span&gt;;
+        }
+        &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;Index1&lt;/span&gt;()
+        {
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;hljs-string&quot;&gt;&quot;Index1&quot;&lt;/span&gt;;
+        }
+    }
+}
+`&lt;/pre&gt;
+
+**在浏览器访问**
+
+![这里写图片描述](http://img.blog.csdn.net/20170425222032807?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+
+![这里写图片描述](http://img.blog.csdn.net/20170425222117349?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+
+**加参数**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`        &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;hljs-title&quot;&gt;Index&lt;/span&gt;(&lt;span class=&quot;hljs-keyword&quot;&gt;string&lt;/span&gt; a)
+        {
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;hljs-string&quot;&gt;&quot;index,a=&quot;&lt;/span&gt;+a;
+        }`&lt;/pre&gt;
+
+访问URL：[http://localhost:1481/Test/?a=1](http://localhost:1481/Test/?a=1)
+
+### 视图 View
+
+**修改Controller**
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&lt;span class=&quot;hljs-keyword&quot;&gt;using&lt;/span&gt; System.Web.Mvc;
+
+namespace MvcApplication1.Controllers
+{
+    &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;hljs-keyword&quot;&gt;class&lt;/span&gt; TestController : Controller
+    {
+        &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; ActionResult &lt;span class=&quot;hljs-title&quot;&gt;Index&lt;/span&gt;()
+        {
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; View();
+        }
+    }
+}`&lt;/pre&gt;
+
+**在Controller上点右键添加视图** 
+
+![这里写图片描述](http://img.blog.csdn.net/20170425222520500?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+
+![这里写图片描述](http://img.blog.csdn.net/20170425222645572?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQveHVuZGg=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast)
+
+传值的话使用ViewBag，示例
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`  &lt;span class=&quot;hljs-keyword&quot;&gt;public&lt;/span&gt; ActionResult &lt;span class=&quot;hljs-title&quot;&gt;Welcome&lt;/span&gt;(&lt;span class=&quot;hljs-keyword&quot;&gt;string&lt;/span&gt; message, &lt;span class=&quot;hljs-keyword&quot;&gt;int&lt;/span&gt; num = &lt;span class=&quot;hljs-number&quot;&gt;1&lt;/span&gt;)
+        {
+            ViewBag.Message =  message;
+            ViewBag.Num = num;
+            &lt;span class=&quot;hljs-keyword&quot;&gt;return&lt;/span&gt; View();
+        } `&lt;/pre&gt;
+
+&lt;pre class=&quot;prettyprint&quot;&gt;`&amp;lt;ul&amp;gt;
+@&lt;span class=&quot;hljs-keyword&quot;&gt;for&lt;/span&gt; (int &lt;span class=&quot;hljs-built_in&quot;&gt;i&lt;/span&gt; = &lt;span class=&quot;hljs-number&quot;&gt;0&lt;/span&gt;; &lt;span class=&quot;hljs-built_in&quot;&gt;i&lt;/span&gt; &amp;lt; &lt;span class=&quot;hljs-transposed_variable&quot;&gt;ViewBag.&lt;/span&gt;Num; &lt;span class=&quot;hljs-built_in&quot;&gt;i&lt;/span&gt;++)
+&lt;span class=&quot;hljs-cell&quot;&gt;{
+    &amp;lt;li&amp;gt;@ViewBag.Message&amp;lt;/li&amp;gt;
+}&lt;/span&gt;
+&amp;lt;/ul&amp;gt;
+
+        &lt;div&gt;
+            作者：xundh 发表于2017/4/25 21:55:51 [原文链接](http://blog.csdn.net/xundh/article/details/70767823)
+        &lt;/div&gt;
+        &lt;div&gt;
+        阅读：31 评论：0 [查看评论](http://blog.csdn.net/xundh/article/details/70767823#comments)
+        &lt;/div&gt;
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://xiexiexin.github.io/2017/04/25/原-ASP-NET-MVC框架入门/" data-id="cj2d8n62y00064cm4p5mfuyq3" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
 
 
   <nav id="page-nav">
@@ -1299,10 +1406,6 @@ Settings参数列表：
       <ul>
         
           <li>
-            <a href="/2017/05/06/First-Article/">First Article</a>
-          </li>
-        
-          <li>
             <a href="/2017/05/06/hello-world/">Hello World</a>
           </li>
         
@@ -1316,6 +1419,10 @@ Settings参数列表：
         
           <li>
             <a href="/2017/05/02/原-Hadoop-学习笔记八-任务远程提交-Eclipse插件/">[原]Hadoop 学习笔记八 任务远程提交--Eclipse插件</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/28/原-Ionic-自动生成启动图标/">[原]Ionic 自动生成启动图标</a>
           </li>
         
       </ul>
